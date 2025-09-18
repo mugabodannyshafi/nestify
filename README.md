@@ -37,7 +37,7 @@ nestForge is a comprehensive NestJS CLI tool that goes beyond `nest new` and `ne
 
 ```bash
 # Coming soon
-npm install -g nestforge
+npm install -g @mugabodannyshafi/nestforge
 ```
 
 ## 🚀 Usage
