@@ -12,6 +12,7 @@ import { createMainTs } from '../templates/main.template';
 import { createAppModule } from '../templates/app-module.template';
 import { createAppController } from '../templates/app-controller.template';
 import { createAppService } from '../templates/app-service.template';
+import { execSync } from 'child_process';
 
 const execAsync = promisify(exec);
 
@@ -168,8 +169,10 @@ API_VERSION=1
 
     // Create .gitignore
     const gitignoreContent = `# Dependencies
-node_modules/
-dist/
+/dist
+/node_modules
+/build
+
 
 # Environment
 .env
@@ -352,6 +355,22 @@ services:
 
     spinner.succeed('Project structure created!');
 
+    // Initialize Git repository - ADD THIS SECTION
+    spinner.start('Initializing Git repository...');
+    try {
+      process.chdir(projectPath);
+
+      // Initialize git
+      execSync('git init', { stdio: 'ignore' });
+
+      // Stage all files
+      execSync('git add .', { stdio: 'ignore' });
+
+      spinner.succeed('Git repository initialized with all files staged!');
+    } catch (error) {
+      spinner.warn('Git initialization skipped (Git may not be installed)');
+      // Don't fail the whole process if git isn't available
+    }
     // Install dependencies - FIXED: Now uses async execution
     if (!options.skipInstall) {
       spinner.start('Installing dependencies...');

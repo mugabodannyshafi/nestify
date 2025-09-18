@@ -1,6 +1,6 @@
 {
   "name": "@mugabodannyshafi/nestforge",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "A powerful CLI tool for scaffolding production-ready NestJS applications",
   "main": "dist/index.js",
   "bin": {
