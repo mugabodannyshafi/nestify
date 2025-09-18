@@ -12,6 +12,10 @@ import { createMainTs } from '../templates/main.template';
 import { createAppModule } from '../templates/app-module.template';
 import { createAppController } from '../templates/app-controller.template';
 import { createAppService } from '../templates/app-service.template';
+import { createAppControllerSpec } from '../templates/app-controller.spec.template';
+import { createAppServiceSpec } from '../templates/app-service.spec.template';
+import { createAppE2ESpec } from '../templates/app-e2e-spec.template';
+import { createJestE2EConfig } from '../templates/jest-e2e-config.template';
 import { execSync } from 'child_process';
 
 const execAsync = promisify(exec);
@@ -122,8 +126,31 @@ export async function newCommand(
       createAppController(),
     );
     fs.writeFileSync(
+      path.join(projectPath, 'src/app.controller.spec.ts'),
+      createAppControllerSpec(),
+    );
+    fs.writeFileSync(
       path.join(projectPath, 'src/app.service.ts'),
       createAppService(),
+    );
+    fs.writeFileSync(
+      path.join(projectPath, 'src/app.service.spec.ts'),
+      createAppServiceSpec(),
+    );
+
+    const testPath = path.join(projectPath, 'test');
+    fs.ensureDirSync(testPath);
+
+    // Create app.e2e-spec.ts
+    fs.writeFileSync(
+      path.join(testPath, 'app.e2e-spec.ts'),
+      createAppE2ESpec(),
+    );
+
+    // Create jest-e2e.json
+    fs.writeFileSync(
+      path.join(testPath, 'jest-e2e.json'),
+      createJestE2EConfig(),
     );
 
     // Create .env and .env.example

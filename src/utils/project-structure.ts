@@ -6,6 +6,8 @@ export function createProjectStructure(projectPath: string) {
     'src',
     'src/common',
     'src/common/decorators',
+    'src/common/exceptions',
+    'src/common/enums',
     'src/common/filters',
     'src/common/guards',
     'src/common/interceptors',
@@ -26,6 +28,7 @@ export function createProjectStructure(projectPath: string) {
   // Create .gitkeep files to preserve empty directories
   const gitkeepDirs = [
     'src/common/decorators',
+    'src/common/enums',
     'src/common/filters',
     'src/common/guards',
     'src/common/interceptors',
