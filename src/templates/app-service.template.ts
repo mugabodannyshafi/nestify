@@ -4,7 +4,7 @@ export function createAppService(): string {
   @Injectable()
   export class AppService {
     getHello(): string {
-      return 'Welcome to your NestJS application built with nestForge! 🔨';
+      return 'Welcome to your NestJS application built with nestify! 🔨';
     }
   }
   `;

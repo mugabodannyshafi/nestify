@@ -19,7 +19,7 @@ export function createAppServiceSpec(): string {
   
     describe('getHello', () => {
       it('should return welcome message', () => {
-        expect(service.getHello()).toBe('Welcome to your NestJS application built with nestForge! 🔨');
+        expect(service.getHello()).toBe('Welcome to your NestJS application built with nestify! 🔨');
       });
   
       it('should return a string', () => {
@@ -27,9 +27,9 @@ export function createAppServiceSpec(): string {
         expect(typeof result).toBe('string');
       });
   
-      it('should contain nestForge', () => {
+      it('should contain nestify', () => {
         const result = service.getHello();
-        expect(result).toContain('nestForge');
+        expect(result).toContain('nestify');
       });
     });
   });

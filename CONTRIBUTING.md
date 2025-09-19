@@ -1,6 +1,6 @@
-# Contributing to nestForge
+# Contributing to nestify
 
-Thank you for your interest in contributing to nestForge! We're excited to build this tool together.
+Thank you for your interest in contributing to nestify! We're excited to build this tool together.
 
 ## 🎉 How to Contribute
 
@@ -16,7 +16,7 @@ Since we're just getting started, we welcome all kinds of contributions:
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/mugabodannyshafi/nestforge.git
+   git clone https://github.com/mugabodannyshafi/nestify.git
    ```
 3. Create a new branch:
    ```bash
@@ -53,7 +53,7 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 
 ## 🙏 Thank You!
 
-Every contribution, no matter how small, helps make nestForge better. Thank you for being part of this project!
+Every contribution, no matter how small, helps make nestify better. Thank you for being part of this project!
 
 ---
 

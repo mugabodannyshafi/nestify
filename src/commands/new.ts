@@ -528,7 +528,7 @@ ${answers.packageManager} run test:cov
 
 ${answers.useGitHubActions ? '## CI/CD\n\nThis project includes GitHub Actions workflows for:\n- Automated testing on push and pull requests\n- Code quality checks (linting, formatting)\n- Test coverage reporting\n' : ''}
 ---
-Generated with nestForge 🔨
+Generated with nestify 🔨
 `;
     fs.writeFileSync(path.join(projectPath, 'README.md'), readmeContent);
 
@@ -1086,7 +1086,7 @@ volumes:
     console.log(chalk.cyan('\n🎉 Happy coding!'));
 
     // Coffee support
-    console.log(chalk.yellow('\n☕ Enjoying nestForge? Buy me a coffee:'));
+    console.log(chalk.yellow('\n☕ Enjoying nestify? Buy me a coffee:'));
     console.log(
       chalk.blue.underline('   https://buymeacoffee.com/mugabodannf\n'),
     );

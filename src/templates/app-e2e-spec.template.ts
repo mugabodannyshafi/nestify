@@ -25,7 +25,7 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Welcome to your NestJS application built with nestForge! 🔨');
+      .expect('Welcome to your NestJS application built with nestify! 🔨');
   });
 
   it('/health (GET)', () => {

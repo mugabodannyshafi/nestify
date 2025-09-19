@@ -1,4 +1,4 @@
-# nestForge 🔨
+# nestify 🔨
 
 A powerful CLI tool for scaffolding production-ready NestJS applications and generating well-structured modules, controllers, and services with ease.
 
@@ -8,7 +8,7 @@ A powerful CLI tool for scaffolding production-ready NestJS applications and gen
 
 ## 📖 About
 
-nestForge is a comprehensive NestJS CLI tool that goes beyond `nest new` and `nest generate`. It not only scaffolds complete, production-ready applications but also generates well-organized modules with proper folder structure, CRUD operations, and automatic module imports.
+nestify is a comprehensive NestJS CLI tool that goes beyond `nest new` and `nest generate`. It not only scaffolds complete, production-ready applications but also generates well-organized modules with proper folder structure, CRUD operations, and automatic module imports.
 
 ## 🎯 Features
 
@@ -37,7 +37,7 @@ nestForge is a comprehensive NestJS CLI tool that goes beyond `nest new` and `ne
 
 ```bash
 # Coming soon
-npm install -g @mugabodannyshafi/nestforge
+npm install -g @mugabodannyshafi/nestify
 ```
 
 ## 🚀 Usage
@@ -45,33 +45,33 @@ npm install -g @mugabodannyshafi/nestforge
 ### Create a New Project
 ```bash
 # Create a full NestJS project with all configurations
-nestforge new my-app
+nestify new my-app
 ```
 
 ### Generate Components
 ```bash
 # Generate a complete module with organized structure
-nestforge generate module users
+nestify generate module users
 
 # Generate a controller with CRUD endpoints
-nestforge generate controller users
+nestify generate controller users
 
 # Generate a service with business logic
-nestforge generate service users
+nestify generate service users
 
 # Generate everything at once (module + controller + service + DTOs)
-nestforge generate resource users
+nestify generate resource users
 
 # Short aliases also work
-nestforge g module users
-nestforge g controller users
-nestforge g service users
-nestforge g resource users
+nestify g module users
+nestify g controller users
+nestify g service users
+nestify g resource users
 ```
 
 ### Generated File Structure Example
 
-When you run `nestforge generate module users`, you get:
+When you run `nestify generate module users`, you get:
 
 ```
 src/

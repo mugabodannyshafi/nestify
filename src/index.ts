@@ -10,14 +10,14 @@ const program = new Command();
 console.log(
   chalk.blue(`
 ╔════════════════════════════════╗
-║      🔨 nestForge CLI 🔨      ║
+║      🔨 nestify CLI 🔨      ║
 ║   NestJS Project Generator     ║
 ╚════════════════════════════════╝
 `),
 );
 
 program
-  .name('nestforge')
+  .name('nestify')
   .description('A powerful CLI tool for scaffolding NestJS applications')
   .version('0.0.1');
 

@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-We want nestForge to be a welcoming and friendly project for everyone. We pledge to make participation in our project a harassment-free experience regardless of background or identity.
+We want nestify to be a welcoming and friendly project for everyone. We pledge to make participation in our project a harassment-free experience regardless of background or identity.
 
 ## Our Standards
 
@@ -28,7 +28,7 @@ Project maintainers are responsible for clarifying standards and are expected to
 
 ## Scope
 
-This Code of Conduct applies within all project spaces, including GitHub issues, pull requests, and any other communication channels related to nestForge.
+This Code of Conduct applies within all project spaces, including GitHub issues, pull requests, and any other communication channels related to nestify.
 
 ## Enforcement
 
