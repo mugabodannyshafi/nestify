@@ -146,6 +146,86 @@ export class FileGeneratorService {
     fs.writeFileSync(path.join(workflowsPath, 'tests.yml'), workflowContent);
   }
 
+  static generateGraphQLFiles(config: ProjectConfig): void {
+    if (!config.answers.useGraphQL) return;
+
+    const graphqlPath = path.join(config.path, 'src', 'graphql');
+    const resolversPath = path.join(graphqlPath, 'resolvers');
+    const schemasPath = path.join(graphqlPath, 'schemas');
+    
+    fs.ensureDirSync(resolversPath);
+    fs.ensureDirSync(schemasPath);
+    
+    // Generate GraphQL module
+    const graphqlModuleContent = this.createGraphQLModuleTemplate();
+    fs.writeFileSync(path.join(graphqlPath, 'graphql.module.ts'), graphqlModuleContent);
+    
+    // Generate base schema
+    const baseSchemaContent = this.createBaseSchemaTemplate();
+    fs.writeFileSync(path.join(schemasPath, 'base.schema.ts'), baseSchemaContent);
+    
+    // Generate example resolver
+    const exampleResolverContent = this.createExampleResolverTemplate();
+    fs.writeFileSync(path.join(resolversPath, 'app.resolver.ts'), exampleResolverContent);
+  }
+
+  private static createGraphQLModuleTemplate(): string {
+    return `import { Module } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
+import { AppResolver } from './resolvers/app.resolver';
+
+@Module({
+  imports: [
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      playground: true,
+      introspection: true,
+    }),
+  ],
+  providers: [AppResolver],
+})
+export class GraphqlModule {}
+`;
+  }
+
+  private static createBaseSchemaTemplate(): string {
+    return `import { ObjectType, Field, ID } from '@nestjs/graphql';
+
+@ObjectType()
+export class BaseEntity {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
+}
+`;
+  }
+
+  private static createExampleResolverTemplate(): string {
+    return `import { Resolver, Query } from '@nestjs/graphql';
+
+@Resolver()
+export class AppResolver {
+  @Query(() => String)
+  hello(): string {
+    return 'Hello GraphQL World!';
+  }
+
+  @Query(() => String)
+  getTime(): string {
+    return new Date().toISOString();
+  }
+}
+`;
+  }
+
   static generateReadme(config: ProjectConfig): void {
     const readmeContent = createReadme(
       config.name,

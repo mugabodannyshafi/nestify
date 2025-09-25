@@ -39,6 +39,24 @@ export class PromptsService {
         message: 'Add Docker support?',
         default: false,
       },
+      {
+        type: 'confirm',
+        name: 'useSwagger',
+        message: 'Add Swagger documentation?',
+        default: true,
+      },
+      {
+        type: 'confirm',
+        name: 'useGraphQL',
+        message: 'Add GraphQL support?',
+        default: false,
+      },
+      {
+        type: 'confirm',
+        name: 'useGitHubActions',
+        message: 'Add GitHub Actions for CI/CD?',
+        default: true,
+      },
     ]);
   }
 }
