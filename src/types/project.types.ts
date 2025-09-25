@@ -7,6 +7,7 @@ export interface ProjectAnswers {
   useDocker: boolean;
   database?: Database;
   useSwagger: boolean;
+  useGraphQL: boolean;
   useGitHubActions: boolean;
 }
 
