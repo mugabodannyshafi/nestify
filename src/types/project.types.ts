@@ -7,6 +7,9 @@ export interface ProjectAnswers {
   useDocker: boolean;
   database?: Database;
   orm?: ORM;
+  useSwagger: boolean;
+  useGraphQL: boolean;
+  useGitHubActions: boolean;
 }
 
 export interface NewCommandOptions {
