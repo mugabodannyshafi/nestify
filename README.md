@@ -8,7 +8,7 @@
 
 ## Documentation
 
-For full documentation, visit [https://nestify-docs.vercel.app/](https://nestify-docs.vercel.app/)
+For full documentation, visit [https://srt.rw/rT9RNP](https://srt.rw/rT9RNP)
 
 ## Installation
 
