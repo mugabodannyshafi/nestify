@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { ProjectConfig } from '../types/project.types';
-import { getDatabaseEnvConfig } from '../constants/database-config';
+
 import { DockerComposeGenerator } from '../generators/docker-compose.generator';
 import { GitHubActionsGenerator } from '../generators/github-actions.generator';
 import { ConfigFilesGenerator } from '../generators/config-files.generator';
@@ -152,21 +152,30 @@ export class FileGeneratorService {
     const graphqlPath = path.join(config.path, 'src', 'graphql');
     const resolversPath = path.join(graphqlPath, 'resolvers');
     const schemasPath = path.join(graphqlPath, 'schemas');
-    
+
     fs.ensureDirSync(resolversPath);
     fs.ensureDirSync(schemasPath);
-    
+
     // Generate GraphQL module
     const graphqlModuleContent = this.createGraphQLModuleTemplate();
-    fs.writeFileSync(path.join(graphqlPath, 'graphql.module.ts'), graphqlModuleContent);
-    
+    fs.writeFileSync(
+      path.join(graphqlPath, 'graphql.module.ts'),
+      graphqlModuleContent,
+    );
+
     // Generate base schema
     const baseSchemaContent = this.createBaseSchemaTemplate();
-    fs.writeFileSync(path.join(schemasPath, 'base.schema.ts'), baseSchemaContent);
-    
+    fs.writeFileSync(
+      path.join(schemasPath, 'base.schema.ts'),
+      baseSchemaContent,
+    );
+
     // Generate example resolver
     const exampleResolverContent = this.createExampleResolverTemplate();
-    fs.writeFileSync(path.join(resolversPath, 'app.resolver.ts'), exampleResolverContent);
+    fs.writeFileSync(
+      path.join(resolversPath, 'app.resolver.ts'),
+      exampleResolverContent,
+    );
   }
 
   private static createGraphQLModuleTemplate(): string {
