@@ -24,7 +24,9 @@
     "dev": "ts-node src/index.ts",
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -79,6 +81,12 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "node_modules/(?!(ora|chalk|chalk-template|cli-spinners|cli-cursor|log-symbols|strip-ansi|ansi-regex|is-interactive|is-unicode-supported|string-width|emoji-regex|ansi-styles)/)"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   }
 }
