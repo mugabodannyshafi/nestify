@@ -1,8 +1,8 @@
 # Nestify - Supercharged NestJS CLI
 
-[![npm version](https://img.shields.io/npm/v/@mugabodannyshafi/nestify.svg)](https://www.npmjs.com/package/@mugabodannyshafi/nestify)
+[![npm version](https://img.shields.io/npm/v/nestify-cli.svg)](https://www.npmjs.com/package/nestify-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/node/v/@mugabodannyshafi/nestify.svg)](https://nodejs.org)
+[![Node.js Version](https://img.shields.io/node/v/nestify-cli.svg)](https://nodejs.org)
 
 > A powerful CLI tool for scaffolding production-ready NestJS projects with Docker, testing, and CI/CD setup out of the box.
 
@@ -13,7 +13,7 @@ For full documentation, visit [https://srt.rw/rT9RNP](https://srt.rw/rT9RNP)
 ## Installation
 
 ```bash
-npm install -g @mugabodannyshafi/nestify
+npm install -g nestify-cli
 ```
 
 ## Quick Start
@@ -92,4 +92,4 @@ MIT
 ## Author
 
 **Shafi Danny MUGABO**  
-[GitHub](https://github.com/mugabodannyshafi) | [NPM](https://www.npmjs.com/package/@mugabodannyshafi/nestify) | [Documentation](https://nestify-docs.vercel.app/)
+[GitHub](https://github.com/mugabodannyshafi) | [NPM](https://www.npmjs.com/package/nestify-cli) | [Documentation](https://nestify-docs.vercel.app/)
