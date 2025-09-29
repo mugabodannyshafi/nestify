@@ -1,6 +1,6 @@
 {
-  "name": "@mugabodannyshafi/nestify",
-  "version": "0.0.6",
+  "name": "nestify-cli",
+  "version": "1.0.0",
   "description": "A powerful CLI tool for scaffolding production-ready NestJS applications",
   "main": "dist/index.js",
   "bin": {
