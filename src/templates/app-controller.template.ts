@@ -1,5 +1,5 @@
 export function createAppController(): string {
-    return `import { Controller, Get } from '@nestjs/common';
+  return `import { Controller, Get } from '@nestjs/common';
   import { AppService } from './app.service';
   
   @Controller()
@@ -20,4 +20,4 @@ export function createAppController(): string {
     }
   }
   `;
-  }
+}
