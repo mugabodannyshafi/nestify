@@ -1,7 +1,10 @@
 export function createMainTs(useSwagger: boolean): string {
-    const swaggerImport = useSwagger ? `import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';\n` : '';
-    
-    const swaggerSetup = useSwagger ? `
+  const swaggerImport = useSwagger
+    ? `import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';\n`
+    : '';
+
+  const swaggerSetup = useSwagger
+    ? `
     // Swagger documentation
     const config = new DocumentBuilder()
       .setTitle('API Documentation')
@@ -11,9 +14,10 @@ export function createMainTs(useSwagger: boolean): string {
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
-  ` : '';
-  
-    return `import { NestFactory } from '@nestjs/core';
+  `
+    : '';
+
+  return `import { NestFactory } from '@nestjs/core';
   ${swaggerImport}import { AppModule } from './app.module';
   
   async function bootstrap() {
@@ -28,8 +32,8 @@ export function createMainTs(useSwagger: boolean): string {
     const port = process.env.PORT || 3000;
     await app.listen(port);
     console.log(\`Application is running on: http://localhost:\${port}\`);
-    ${useSwagger ? "console.log(\`Swagger docs available at: http://localhost:\${port}/api\`);" : ''}
+    ${useSwagger ? 'console.log(\`Swagger docs available at: http://localhost:\${port}/api\`);' : ''}
   }
   bootstrap();
   `;
-  }
+}
