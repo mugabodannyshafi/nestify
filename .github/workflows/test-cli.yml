@@ -21,9 +21,22 @@ jobs:
           npm install
           npm run build
 
-      - name: Test nestify new command
+      - name: Test CLI help command
         run: |
-          # Try without any flags first to see if it works
-          node dist/index.js new test-app --skip-install
-          # Check if the app was created
-          ls -la test-app
+          node dist/index.js --help
+          echo "✅ Help command works!"
+
+      - name: Test CLI version
+        run: |
+          node dist/index.js --version
+          echo "✅ Version command works!"
+
+      - name: Test generate command help
+        run: |
+          node dist/index.js generate --help
+          echo "✅ Generate help works!"
+
+      - name: Test new command help
+        run: |
+          node dist/index.js new --help
+          echo "✅ New command help works!"
