@@ -1,5 +1,5 @@
 export function createAppModule(): string {
-    return `import { Module } from '@nestjs/common';
+  return `import { Module } from '@nestjs/common';
   import { AppController } from './app.controller';
   import { AppService } from './app.service';
   
@@ -10,4 +10,4 @@ export function createAppModule(): string {
   })
   export class AppModule {}
   `;
-  }
+}

@@ -1,5 +1,5 @@
 export function createAppServiceSpec(): string {
-    return `import { Test, TestingModule } from '@nestjs/testing';
+  return `import { Test, TestingModule } from '@nestjs/testing';
   import { AppService } from './app.service';
   
   describe('AppService', () => {
@@ -34,4 +34,4 @@ export function createAppServiceSpec(): string {
     });
   });
   `;
-  }
+}

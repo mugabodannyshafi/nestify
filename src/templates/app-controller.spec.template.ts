@@ -1,5 +1,5 @@
 export function createAppControllerSpec(): string {
-    return `import { Test, TestingModule } from '@nestjs/testing';
+  return `import { Test, TestingModule } from '@nestjs/testing';
   import { AppController } from './app.controller';
   import { AppService } from './app.service';
   
@@ -45,4 +45,4 @@ export function createAppControllerSpec(): string {
     });
   });
   `;
-  }
+}

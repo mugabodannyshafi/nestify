@@ -1,0 +1,30 @@
+name: Format Check
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Check formatting
+        run: |
+          npm run format
+          # Only fail if there are actual changes
+          git diff --exit-code --quiet || (
+            echo "❌ Code is not formatted. Files that need formatting:"
+            git diff --name-only
+            exit 1
+          )

@@ -1,5 +1,5 @@
 export function createAppService(): string {
-    return `import { Injectable } from '@nestjs/common';
+  return `import { Injectable } from '@nestjs/common';
   
   @Injectable()
   export class AppService {
@@ -8,4 +8,4 @@ export function createAppService(): string {
     }
   }
   `;
-  }
+}

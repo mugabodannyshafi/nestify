@@ -1,6 +1,6 @@
 {
-  "name": "@mugabodannyshafi/nestify",
-  "version": "0.0.6",
+  "name": "nestify-cli",
+  "version": "1.0.1",
   "description": "A powerful CLI tool for scaffolding production-ready NestJS applications",
   "main": "dist/index.js",
   "bin": {
@@ -20,6 +20,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\"",
     "dev": "ts-node src/index.ts",
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build",
