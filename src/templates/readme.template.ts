@@ -78,6 +78,6 @@ ${packageManager} run test:cov
 \`\`\`
 
 ${cicdSection}---
-Generated with nestify 🔨
+Generated with nestify 
 `;
 };
