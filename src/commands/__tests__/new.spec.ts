@@ -9,8 +9,10 @@ import { createProjectStructure } from '../../utils/project-structure';
 import { PackageManager, Database } from '../../constants/enums';
 import fs from 'fs-extra';
 import path from 'path';
+import { FormatterService } from '../../services/formatter.service';
 
 jest.mock('fs-extra');
+jest.mock('execa');
 jest.mock('ora', () => {
   return jest.fn(() => ({
     start: jest.fn().mockReturnThis(),
@@ -24,6 +26,7 @@ jest.mock('../../services/git.service');
 jest.mock('../../services/package-installer.service');
 jest.mock('../../utils/console-messages');
 jest.mock('../../utils/project-structure');
+jest.mock('../../services/formatter.service');
 
 describe('newCommand', () => {
   const mockProjectName = 'test-project';
@@ -123,6 +126,30 @@ describe('newCommand', () => {
       );
       expect(FileGeneratorService.generateSourceFiles).toHaveBeenCalledWith(
         expect.objectContaining(expectedConfig),
+      );
+    });
+
+    it('should format code after installation when skipInstall is false', async () => {
+      await newCommand(mockProjectName, mockOptions);
+
+      expect(FormatterService.format).toHaveBeenCalledWith(
+        mockProjectPath,
+        PackageManager.NPM,
+      );
+      expect(FormatterService.format).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip formatting when skipInstall is true', async () => {
+      const skipOptions: NewCommandOptions = {
+        ...mockOptions,
+        skipInstall: true,
+      };
+
+      await newCommand(mockProjectName, skipOptions);
+
+      expect(FormatterService.format).not.toHaveBeenCalled();
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Code formatting skipped'),
       );
     });
 
