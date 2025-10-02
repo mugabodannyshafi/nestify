@@ -55,6 +55,7 @@ export async function newCommand(
       await PackageInstallerService.install(
         projectPath,
         answers.packageManager,
+        answers.useSwagger,
       );
 
       await FormatterService.format(projectPath, answers.packageManager);

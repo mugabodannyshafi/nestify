@@ -18,6 +18,7 @@ import { createAppServiceSpec } from '../templates/app-service.spec.template';
 import { createAppE2ESpec } from '../templates/app-e2e-spec.template';
 import { createJestE2EConfig } from '../templates/jest-e2e-config.template';
 import { createReadme } from '../templates/readme.template';
+import { PackageInstallerService } from './package-installer.service';
 
 export class FileGeneratorService {
   static generateBaseFiles(config: ProjectConfig): void {
@@ -143,5 +144,13 @@ export class FileGeneratorService {
     );
 
     fs.writeFileSync(path.join(config.path, 'README.md'), readmeContent);
+  }
+
+  static async installDependencies(config: ProjectConfig): Promise<void> {
+    await PackageInstallerService.install(
+      config.path,
+      config.answers.packageManager,
+      config.answers.useSwagger,
+    );
   }
 }
