@@ -3,9 +3,14 @@ import fs from 'fs-extra';
 import path from 'path';
 import ora, { Ora } from 'ora';
 
-type Schematic = 'graphql' | 'resolver' | 'schema';
+type Schematic = 'graphql' | 'resolver' | 'schema' | 'dataloader';
 
-const VALID_SCHEMATICS: Schematic[] = ['graphql', 'resolver', 'schema'];
+const VALID_SCHEMATICS: Schematic[] = [
+  'graphql',
+  'resolver',
+  'schema',
+  'dataloader',
+];
 
 export async function generateCommand(schematic: string, name: string) {
   const spinner = ora();
@@ -38,6 +43,9 @@ export async function generateCommand(schematic: string, name: string) {
         break;
       case 'schema':
         await generateSchema(name, spinner);
+        break;
+      case 'dataloader':
+        await generateDataLoader(name, spinner);
         break;
     }
 
@@ -82,9 +90,11 @@ async function setupGraphQL(spinner: Ora) {
   const graphqlPath = path.join('src', 'graphql');
   const resolversPath = path.join(graphqlPath, 'resolvers');
   const schemasPath = path.join(graphqlPath, 'schemas');
+  const dataLoadersPath = path.join(graphqlPath, 'dataloaders');
 
   fs.ensureDirSync(resolversPath);
   fs.ensureDirSync(schemasPath);
+  fs.ensureDirSync(dataLoadersPath);
 
   // Generate GraphQL module
   spinner.text = 'Creating GraphQL module...';
@@ -107,6 +117,17 @@ async function setupGraphQL(spinner: Ora) {
     exampleResolverContent,
   );
 
+  // Generate DataLoader service
+  spinner.text = 'Creating DataLoader service...';
+  const {
+    createDataLoaderServiceTemplate,
+  } = require('../templates/dataloader.template');
+  const dataLoaderServiceContent = createDataLoaderServiceTemplate();
+  fs.writeFileSync(
+    path.join(dataLoadersPath, 'dataloader.service.ts'),
+    dataLoaderServiceContent,
+  );
+
   // Update app.module.ts
   spinner.text = 'Updating app module...';
   updateAppModuleForGraphQL();
@@ -117,10 +138,14 @@ async function setupGraphQL(spinner: Ora) {
   console.log(chalk.gray('1. Install GraphQL dependencies:'));
   console.log(
     chalk.white(
-      '   npm install @nestjs/graphql @nestjs/apollo graphql apollo-server-express',
+      '   npm install @nestjs/graphql @nestjs/apollo graphql apollo-server-express dataloader',
     ),
   );
-  console.log(chalk.gray('2. Start your server and visit:'));
+  console.log(chalk.gray('2. Generate components:'));
+  console.log(chalk.white('   nestify generate resolver <name>'));
+  console.log(chalk.white('   nestify generate schema <name>'));
+  console.log(chalk.white('   nestify generate dataloader <name>'));
+  console.log(chalk.gray('3. Start your server and visit:'));
   console.log(chalk.white('   http://localhost:3000/graphql'));
 }
 
@@ -150,12 +175,29 @@ async function generateSchema(name: string, spinner: Ora) {
   spinner.succeed(`Schema created: src/graphql/schemas/${fileName}`);
 }
 
+async function generateDataLoader(name: string, spinner: Ora) {
+  const dataLoaderPath = path.join('src', 'graphql', 'dataloaders');
+  const fileName = `${name}.dataloader.ts`;
+
+  spinner.start('Creating DataLoader...');
+  fs.ensureDirSync(dataLoaderPath);
+
+  const {
+    createDataLoaderTemplate,
+  } = require('../templates/dataloader.template');
+  const dataLoaderContent = createDataLoaderTemplate(name);
+  fs.writeFileSync(path.join(dataLoaderPath, fileName), dataLoaderContent);
+
+  spinner.succeed(`DataLoader created: src/graphql/dataloaders/${fileName}`);
+}
+
 function createGraphQLModuleTemplate(): string {
   return `import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { AppResolver } from './resolvers/app.resolver';
+import { DataLoaderService } from './dataloaders/dataloader.service';
 
 @Module({
   imports: [
@@ -168,9 +210,15 @@ import { AppResolver } from './resolvers/app.resolver';
         'graphql-ws': true,
         'subscriptions-transport-ws': true,
       },
+      context: ({ req, res }) => ({
+        req,
+        res,
+        dataloaders: new Map(),
+      }),
     }),
   ],
-  providers: [AppResolver],
+  providers: [AppResolver, DataLoaderService],
+  exports: [DataLoaderService],
 })
 export class GraphqlModule {}
 `;
@@ -243,11 +291,14 @@ export class AppResolver {
 function createResolverTemplate(name: string): string {
   const className = toPascalCase(name);
 
-  return `import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+  return `import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { ${className} } from '../schemas/${name}.schema';
+import { ${className}DataLoader } from '../dataloaders/${name}.dataloader';
 
 @Resolver(() => ${className})
 export class ${className}Resolver {
+  constructor(private readonly ${name}DataLoader: ${className}DataLoader) {}
+
   @Query(() => [${className}])
   async ${name}s(): Promise<${className}[]> {
     // TODO: Implement ${name}s query
@@ -256,8 +307,14 @@ export class ${className}Resolver {
 
   @Query(() => ${className}, { nullable: true })
   async ${name}(@Args('id', { type: () => ID }) id: string): Promise<${className} | null> {
-    // TODO: Implement ${name} query
-    return null;
+    // Use DataLoader for efficient loading
+    return this.${name}DataLoader.load${className}(id);
+  }
+
+  @Query(() => [${className}])
+  async ${name}sByIds(@Args('ids', { type: () => [ID] }) ids: string[]): Promise<(${className} | null)[]> {
+    // Batch load multiple items efficiently
+    return this.${name}DataLoader.load${className}s(ids);
   }
 
   @Mutation(() => ${className})
@@ -265,6 +322,8 @@ export class ${className}Resolver {
     @Args('input') input: any, // TODO: Create proper input type
   ): Promise<${className}> {
     // TODO: Implement create${className} mutation
+    // Clear cache after mutation
+    // this.${name}DataLoader.clearAll();
     throw new Error('Not implemented');
   }
 
@@ -274,12 +333,16 @@ export class ${className}Resolver {
     @Args('input') input: any, // TODO: Create proper input type
   ): Promise<${className}> {
     // TODO: Implement update${className} mutation
+    // Clear specific item from cache
+    // this.${name}DataLoader.clear${className}(id);
     throw new Error('Not implemented');
   }
 
   @Mutation(() => Boolean)
   async delete${className}(@Args('id', { type: () => ID }) id: string): Promise<boolean> {
     // TODO: Implement delete${className} mutation
+    // Clear specific item from cache
+    // this.${name}DataLoader.clear${className}(id);
     return false;
   }
 }

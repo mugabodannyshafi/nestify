@@ -57,7 +57,7 @@ export class PromptsService {
         name: 'useGitHubActions',
         message: 'Add GitHub Actions for CI/CD?',
         default: true,
-      }
+      },
     ]);
   }
 }

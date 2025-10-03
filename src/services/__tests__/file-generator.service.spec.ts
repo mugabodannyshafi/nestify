@@ -46,6 +46,9 @@ describe('FileGeneratorService', () => {
       packageManager: PackageManager.NPM,
       useDocker: true,
       database: Database.POSTGRES,
+      useSwagger: false,
+      useGraphQL: false,
+      useGitHubActions: false,
     },
   };
 

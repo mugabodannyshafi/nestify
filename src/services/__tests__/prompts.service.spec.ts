@@ -21,6 +21,9 @@ describe('PromptsService', () => {
         description: 'Test app',
         author: 'Test Author',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -66,6 +69,9 @@ describe('PromptsService', () => {
         author: 'John Doe',
         useDocker: true,
         database: Database.POSTGRES,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -81,6 +87,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -101,6 +110,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -121,6 +133,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -143,6 +158,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -161,6 +179,9 @@ describe('PromptsService', () => {
         description: 'A NestJS application',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -181,6 +202,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -199,6 +223,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -217,6 +244,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -235,6 +265,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -256,6 +289,9 @@ describe('PromptsService', () => {
           description: 'Test',
           author: '',
           useDocker: false,
+          useSwagger: false,
+          useGraphQL: false,
+          useGitHubActions: false,
         };
 
         mockPrompt.mockResolvedValue(mockAnswers);
@@ -274,6 +310,9 @@ describe('PromptsService', () => {
           author: '',
           useDocker: true,
           database: db,
+          useSwagger: false,
+          useGraphQL: false,
+          useGitHubActions: false,
         };
 
         mockPrompt.mockResolvedValue(mockAnswers);
@@ -290,6 +329,9 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -307,6 +349,9 @@ describe('PromptsService', () => {
         author: '',
         useDocker: true,
         database: Database.POSTGRES,
+        useSwagger: false,
+        useGraphQL: false,
+        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
