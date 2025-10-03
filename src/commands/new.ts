@@ -56,7 +56,6 @@ export async function newCommand(
       await PackageInstallerService.install(
         projectPath,
         answers.packageManager,
-        answers.useSwagger,
         answers.database,
       );
 

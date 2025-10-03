@@ -7,19 +7,16 @@ import { PackageManager, Database } from '../constants/enums';
 const execAsync = promisify(exec);
 
 export class PackageInstallerService {
-  static getDependencies(useSwagger: boolean, database?: Database): string[] {
+  static getDependencies(database?: Database): string[] {
     const dependencies = [
       '@nestjs/common',
       '@nestjs/core',
       '@nestjs/platform-express',
       '@nestjs/config',
+      '@nestjs/swagger',
       'reflect-metadata',
       'rxjs',
     ];
-
-    if (useSwagger) {
-      dependencies.push('@nestjs/swagger');
-    }
 
     // Add database-specific dependencies
     if (database === Database.MYSQL) {
@@ -86,13 +83,12 @@ export class PackageInstallerService {
   static async install(
     projectPath: string,
     packageManager: PackageManager,
-    useSwagger: boolean = true,
     database?: Database,
   ): Promise<void> {
     const spinner = ora('Installing dependencies...').start();
 
     try {
-      const dependencies = this.getDependencies(useSwagger, database);
+      const dependencies = this.getDependencies(database);
       const devDependencies = this.getDevDependencies();
 
       // Install regular dependencies

@@ -44,10 +44,8 @@ describe('FileGeneratorService', () => {
       description: 'Test description',
       author: 'Test Author',
       packageManager: PackageManager.NPM,
-      useSwagger: true,
       useDocker: true,
       database: Database.POSTGRES,
-      useGitHubActions: true,
     },
   };
 
@@ -68,7 +66,6 @@ describe('FileGeneratorService', () => {
         'test-project',
         'Test description',
         'Test Author',
-        true,
         Database.POSTGRES,
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
@@ -113,7 +110,6 @@ describe('FileGeneratorService', () => {
 
       FileGeneratorService.generateSourceFiles(mockConfig);
 
-      expect(mainTemplate.createMainTs).toHaveBeenCalledWith(true);
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         '/test/path/src/main.ts',
         mockMainTs,
@@ -369,20 +365,6 @@ describe('FileGeneratorService', () => {
         mockWorkflow,
       );
     });
-
-    it('should not generate GitHub Actions files when useGitHubActions is false', () => {
-      const configWithoutActions: ProjectConfig = {
-        ...mockConfig,
-        answers: { ...mockConfig.answers, useGitHubActions: false },
-      };
-
-      FileGeneratorService.generateGitHubActionsFiles(configWithoutActions);
-
-      expect(
-        GitHubActionsGenerator.generateTestWorkflow,
-      ).not.toHaveBeenCalled();
-      expect(fs.ensureDirSync).not.toHaveBeenCalled();
-    });
   });
 
   describe('generateReadme', () => {
@@ -396,7 +378,6 @@ describe('FileGeneratorService', () => {
         'test-project',
         'Test description',
         PackageManager.NPM,
-        true,
         true,
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(

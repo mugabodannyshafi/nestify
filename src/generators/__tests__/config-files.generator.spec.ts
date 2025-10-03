@@ -12,8 +12,6 @@ describe('Project Types', () => {
         author: 'Test Author',
         useDocker: true,
         database: Database.POSTGRES,
-        useSwagger: true,
-        useGitHubActions: false,
       };
 
       expect(answers.packageManager).toBe(PackageManager.NPM);
@@ -21,8 +19,6 @@ describe('Project Types', () => {
       expect(answers.author).toBe('Test Author');
       expect(answers.useDocker).toBe(true);
       expect(answers.database).toBe(Database.POSTGRES);
-      expect(answers.useSwagger).toBe(true);
-      expect(answers.useGitHubActions).toBe(false);
     });
 
     it('should allow optional database field', () => {
@@ -31,8 +27,6 @@ describe('Project Types', () => {
         description: 'Test',
         author: 'Author',
         useDocker: false,
-        useSwagger: false,
-        useGitHubActions: true,
       };
 
       expect(answers.database).toBeUndefined();
@@ -62,8 +56,6 @@ describe('Project Types', () => {
           author: 'Developer',
           useDocker: true,
           database: Database.MONGODB,
-          useSwagger: true,
-          useGitHubActions: true,
         },
       };
 
