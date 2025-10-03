@@ -20,7 +20,7 @@ NODE_ENV=development
 DB_TYPE=mysql
 DB_HOST=db
 DB_PORT=3306
-DB_DATABASE=${projectName}
+DB_NAME=${projectName}
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
 
@@ -47,7 +47,7 @@ NODE_ENV=testing
 DB_TYPE=mysql
 DB_HOST=db-test
 DB_PORT=3306
-DB_DATABASE=${projectName}_test
+DB_NAME=${projectName}_test
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
 
@@ -73,7 +73,7 @@ NODE_ENV=development
 DB_TYPE=postgres
 DB_HOST=db
 DB_PORT=5432
-DB_DATABASE=${projectName}
+DB_NAME=${projectName}
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
 
@@ -100,7 +100,7 @@ NODE_ENV=testing
 DB_TYPE=postgres
 DB_HOST=db-test
 DB_PORT=5432
-DB_DATABASE=${projectName}_test
+DB_NAME=${projectName}_test
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
 
@@ -126,7 +126,7 @@ NODE_ENV=development
 DB_TYPE=mongodb
 DB_HOST=db
 DB_PORT=27017
-DB_DATABASE=${projectName}
+DB_NAME=${projectName}
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
 DATABASE_URL=mongodb://app_user:app_password_123@db:27017/${projectName}?authSource=admin
@@ -154,7 +154,7 @@ NODE_ENV=testing
 DB_TYPE=mongodb
 DB_HOST=db-test
 DB_PORT=27017
-DB_DATABASE=${projectName}_test
+DB_NAME=${projectName}_test
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
 DATABASE_URL=mongodb://app_user:app_password_123@db-test:27017/${projectName}_test?authSource=admin

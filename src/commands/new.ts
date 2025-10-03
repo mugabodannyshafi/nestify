@@ -42,6 +42,7 @@ export async function newCommand(
 
     FileGeneratorService.generateBaseFiles(config);
     FileGeneratorService.generateSourceFiles(config);
+    FileGeneratorService.generateDatabaseFiles(config);
     FileGeneratorService.generateTestFiles(config);
     FileGeneratorService.generateEnvironmentFiles(config);
     FileGeneratorService.generateConfigFiles(config);
