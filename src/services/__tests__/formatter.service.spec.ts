@@ -1,5 +1,5 @@
 import { FormatterService } from '../formatter.service';
-import { execa } from 'execa';
+import execa from 'execa';
 
 jest.mock('execa');
 jest.mock('ora', () => {

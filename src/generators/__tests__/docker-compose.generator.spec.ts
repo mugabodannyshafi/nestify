@@ -17,7 +17,13 @@ describe('DockerComposeGenerator', () => {
       author: 'Test Author',
       useDocker,
       database,
+<<<<<<< HEAD
       orm,
+=======
+      useSwagger: false,
+      useGraphQL: false,
+      useGitHubActions: false,
+>>>>>>> c615a6f (feat: implement complete GraphQL scaffolding with DataLoader support)
     },
   });
 

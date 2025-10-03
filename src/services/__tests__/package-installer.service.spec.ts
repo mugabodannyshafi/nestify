@@ -31,7 +31,7 @@ describe('PackageInstallerService', () => {
       warn: jest.fn().mockReturnThis(),
     };
 
-    (ora as jest.Mock).mockReturnValue(mockSpinner);
+    (ora as unknown as jest.Mock).mockReturnValue(mockSpinner);
 
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -52,6 +52,7 @@ describe('PackageInstallerService', () => {
       expect(deps).toHaveLength(7);
     });
 
+<<<<<<< HEAD
     it('should include TypeORM dependencies for MySQL', () => {
       const deps = PackageInstallerService.getDependencies(
         Database.MYSQL,
@@ -101,6 +102,16 @@ describe('PackageInstallerService', () => {
 
       expect(deps).toContain('@nestjs/mongoose');
       expect(deps).toContain('mongoose');
+=======
+    it('should include GraphQL dependencies when useGraphQL is true', () => {
+      const deps = PackageInstallerService.getDependencies(undefined, true);
+
+      expect(deps).toContain('@nestjs/graphql');
+      expect(deps).toContain('@nestjs/apollo');
+      expect(deps).toContain('graphql');
+      expect(deps).toContain('dataloader');
+      expect(deps).toHaveLength(12);
+>>>>>>> c615a6f (feat: implement complete GraphQL scaffolding with DataLoader support)
     });
   });
 
@@ -112,7 +123,7 @@ describe('PackageInstallerService', () => {
       expect(devDeps).toContain('@nestjs/testing');
       expect(devDeps).toContain('typescript');
       expect(devDeps).toContain('jest');
-      expect(devDeps).toHaveLength(23);
+      expect(devDeps).toHaveLength(24);
     });
 
     it('should include Prisma in dev dependencies when using Prisma ORM', () => {

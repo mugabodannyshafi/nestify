@@ -257,6 +257,7 @@ export class AppResolver {
       config.path,
       config.answers.packageManager,
       config.answers.database,
+      config.answers.useGraphQL,
     );
   }
 }
