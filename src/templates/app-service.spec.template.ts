@@ -19,7 +19,7 @@ export function createAppServiceSpec(): string {
   
     describe('getHello', () => {
       it('should return welcome message', () => {
-        expect(service.getHello()).toBe('Welcome to your NestJS application built with nestify! 🔨');
+        expect(service.getHello()).toBe('Welcome to your NestJS application built with nestify!');
       });
   
       it('should return a string', () => {

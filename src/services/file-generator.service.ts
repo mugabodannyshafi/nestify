@@ -18,6 +18,9 @@ import { createAppServiceSpec } from '../templates/app-service.spec.template';
 import { createAppE2ESpec } from '../templates/app-e2e-spec.template';
 import { createJestE2EConfig } from '../templates/jest-e2e-config.template';
 import { createReadme } from '../templates/readme.template';
+import { createDatabaseModule } from '../templates/database-module.template';
+import { Database } from '../constants/enums';
+import { PackageInstallerService } from './package-installer.service';
 
 export class FileGeneratorService {
   static generateBaseFiles(config: ProjectConfig): void {
@@ -30,7 +33,7 @@ export class FileGeneratorService {
         name,
         answers.description,
         answers.author,
-        answers.useSwagger,
+        answers.database,
       ),
     );
 
@@ -48,6 +51,7 @@ export class FileGeneratorService {
         2,
       ),
     );
+    return;
   }
 
   static generateSourceFiles(config: ProjectConfig): void {
@@ -55,10 +59,7 @@ export class FileGeneratorService {
     const srcPath = path.join(projectPath, 'src');
 
     // Main application files
-    fs.writeFileSync(
-      path.join(srcPath, 'main.ts'),
-      createMainTs(answers.useSwagger),
-    );
+    fs.writeFileSync(path.join(srcPath, 'main.ts'), createMainTs());
     fs.writeFileSync(path.join(srcPath, 'app.module.ts'), createAppModule());
     fs.writeFileSync(
       path.join(srcPath, 'app.controller.ts'),
@@ -74,6 +75,20 @@ export class FileGeneratorService {
     fs.writeFileSync(
       path.join(srcPath, 'app.service.spec.ts'),
       createAppServiceSpec(),
+    );
+  }
+
+  static generateDatabaseFiles(config: ProjectConfig): void {
+    let database = config.answers.database;
+    if (!database || !config.answers.useDocker) return;
+
+    const dbPath = path.join(config.path, 'src/database');
+
+    fs.ensureDirSync(dbPath);
+
+    fs.writeFileSync(
+      path.join(dbPath, 'database.module.ts'),
+      createDatabaseModule(database),
     );
   }
 
@@ -121,8 +136,6 @@ export class FileGeneratorService {
   }
 
   static generateGitHubActionsFiles(config: ProjectConfig): void {
-    if (!config.answers.useGitHubActions) return;
-
     const workflowsPath = path.join(config.path, '.github/workflows');
     fs.ensureDirSync(workflowsPath);
 
@@ -228,9 +241,16 @@ export class AppResolver {
       config.answers.description,
       config.answers.packageManager,
       config.answers.useDocker,
-      config.answers.useGitHubActions,
     );
 
     fs.writeFileSync(path.join(config.path, 'README.md'), readmeContent);
+  }
+
+  static async installDependencies(config: ProjectConfig): Promise<void> {
+    await PackageInstallerService.install(
+      config.path,
+      config.answers.packageManager,
+      config.answers.database,
+    );
   }
 }

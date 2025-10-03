@@ -1,6 +1,6 @@
 {
   "name": "nestify-cli",
-  "version": "1.0.1",
+  "version": "1.4.2",
   "description": "A powerful CLI tool for scaffolding production-ready NestJS applications",
   "main": "dist/index.js",
   "bin": {
@@ -24,7 +24,9 @@
     "dev": "ts-node src/index.ts",
     "watch": "tsc --watch",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@nestjs/apollo": "^13.1.0",
@@ -35,6 +37,7 @@
     "apollo-server-express": "^3.13.0",
     "chalk": "^4.1.2",
     "commander": "^14.0.1",
+    "execa": "^9.6.0",
     "fs-extra": "^11.3.2",
     "graphql": "^16.11.0",
     "graphql-subscriptions": "^3.0.0",
@@ -86,6 +89,12 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "transformIgnorePatterns": [
+      "node_modules/(?!(ora|chalk|chalk-template|cli-spinners|cli-cursor|log-symbols|strip-ansi|ansi-regex|is-interactive|is-unicode-supported|string-width|emoji-regex|ansi-styles)/)"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   }
 }

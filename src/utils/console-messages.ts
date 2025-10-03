@@ -32,19 +32,13 @@ export class ConsoleMessages {
     this.showStartCommand(config, stepNumber);
 
     // Additional features info
-    if (config.answers.useSwagger) {
-      console.log(
-        chalk.cyan('\n📚 Swagger documentation will be available at:'),
-      );
-      console.log(chalk.white('   http://localhost:3000/api'));
-    }
 
-    if (config.answers.useGitHubActions) {
-      console.log(chalk.cyan('\n🚀 GitHub Actions workflows added:'));
-      console.log(
-        chalk.white('   - .github/workflows/tests.yml (automated testing)'),
-      );
-    }
+    console.log(chalk.cyan('\n📚 Swagger documentation will be available at:'));
+    console.log(chalk.white('   http://localhost:3000/api'));
+    console.log(chalk.cyan('\n🚀 GitHub Actions workflows added:'));
+    console.log(
+      chalk.white('   - .github/workflows/tests.yml (automated testing)'),
+    );
 
     console.log(chalk.cyan('\n🎉 Happy coding!'));
     console.log(chalk.yellow('\n☕ Enjoying nestify? Buy me a coffee:'));

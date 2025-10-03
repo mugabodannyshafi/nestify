@@ -4,13 +4,14 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { newCommand } from './commands/new';
 import { generateCommand } from './commands/generate';
+import pkg from '../package.json';
 
 const program = new Command();
 
 console.log(
   chalk.blue(`
 ╔════════════════════════════════╗
-║      🔨 nestify CLI 🔨      ║
+║        nestify CLI        ║
 ║   NestJS Project Generator     ║
 ╚════════════════════════════════╝
 `),
@@ -19,7 +20,7 @@ console.log(
 program
   .name('nestify')
   .description('A powerful CLI tool for scaffolding NestJS applications')
-  .version('0.0.1');
+  .version(pkg.version, '-v, --version', 'Show CLI version');
 
 // Add the 'new' command
 program

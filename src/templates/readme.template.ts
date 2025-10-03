@@ -5,7 +5,6 @@ export const createReadme = (
   description: string,
   packageManager: 'npm' | 'yarn' | 'pnpm',
   useDocker: boolean,
-  useGitHubActions: boolean,
 ): string => {
   const installCommand =
     packageManager === 'yarn'
@@ -26,17 +25,6 @@ docker-compose up -d
 \`\`\`
 
 ### Without Docker
-
-`
-    : '';
-
-  const cicdSection = useGitHubActions
-    ? `## CI/CD
-
-This project includes GitHub Actions workflows for:
-- Automated testing on push and pull requests
-- Code quality checks (linting, formatting)
-- Test coverage reporting
 
 `
     : '';
@@ -77,7 +65,14 @@ ${packageManager} run test:e2e
 ${packageManager} run test:cov
 \`\`\`
 
-${cicdSection}---
-Generated with nestify 🔨
+## CI/CD
+
+This project includes GitHub Actions workflows for:
+- Automated testing on push and pull requests
+- Code quality checks (linting, formatting)
+- Test coverage reporting
+
+---
+Generated with nestify 
 `;
 };

@@ -1,4 +1,4 @@
-name: Build
+name: Unit Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,8 +21,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build the project
-        run: npm run build
+      - name: Run unit tests
+        run: npm test
 
-      - name: Check if CLI works
-        run: node dist/index.js --version
+      - name: Run tests with coverage
+        run: npm run test:cov
