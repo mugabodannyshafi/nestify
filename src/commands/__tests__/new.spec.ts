@@ -166,6 +166,7 @@ describe('newCommand', () => {
         mockProjectPath,
         PackageManager.NPM,
         true,
+        Database.POSTGRES,
       );
     });
 

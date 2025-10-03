@@ -2,22 +2,32 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import chalk from 'chalk';
 import ora from 'ora';
-import { PackageManager } from '../constants/enums';
+import { PackageManager, Database } from '../constants/enums';
 
 const execAsync = promisify(exec);
 
 export class PackageInstallerService {
-  static getDependencies(useSwagger: boolean): string[] {
+  static getDependencies(useSwagger: boolean, database?: Database): string[] {
     const dependencies = [
       '@nestjs/common',
       '@nestjs/core',
       '@nestjs/platform-express',
+      '@nestjs/config',
       'reflect-metadata',
       'rxjs',
     ];
 
     if (useSwagger) {
       dependencies.push('@nestjs/swagger');
+    }
+
+    // Add database-specific dependencies
+    if (database === Database.MYSQL) {
+      dependencies.push('@nestjs/typeorm', 'typeorm', 'mysql2');
+    } else if (database === Database.POSTGRES) {
+      dependencies.push('@nestjs/typeorm', 'typeorm', 'pg');
+    } else if (database === Database.MONGODB) {
+      dependencies.push('@nestjs/mongoose', 'mongoose');
     }
 
     return dependencies;
@@ -77,11 +87,12 @@ export class PackageInstallerService {
     projectPath: string,
     packageManager: PackageManager,
     useSwagger: boolean = true,
+    database?: Database,
   ): Promise<void> {
     const spinner = ora('Installing dependencies...').start();
 
     try {
-      const dependencies = this.getDependencies(useSwagger);
+      const dependencies = this.getDependencies(useSwagger, database);
       const devDependencies = this.getDevDependencies();
 
       // Install regular dependencies

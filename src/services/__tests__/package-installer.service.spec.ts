@@ -50,6 +50,7 @@ describe('PackageInstallerService', () => {
         '@nestjs/common',
         '@nestjs/core',
         '@nestjs/platform-express',
+        '@nestjs/config',
         'reflect-metadata',
         'rxjs',
       ]);
@@ -59,7 +60,7 @@ describe('PackageInstallerService', () => {
       const deps = PackageInstallerService.getDependencies(true);
 
       expect(deps).toContain('@nestjs/swagger');
-      expect(deps).toHaveLength(6);
+      expect(deps).toHaveLength(7);
     });
   });
 
