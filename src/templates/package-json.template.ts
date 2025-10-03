@@ -1,5 +1,5 @@
 // src/templates/package-json.template.ts
-import {Database} from '../constants/enums';
+import { Database } from '../constants/enums';
 
 export function createPackageJson(
   projectName: string,
@@ -7,13 +7,13 @@ export function createPackageJson(
   author: string,
   useSwagger: boolean = true,
   database?: Database,
-):string {
+): string {
   const dependencies: Record<string, string> = {
     '@nestjs/common': '^10.0.0',
     '@nestjs/core': '^10.0.0',
     '@nestjs/platform-express': '^10.0.0',
     'reflect-metadata': '^0.2.0',
-    'rxjs': '^7.8.1',
+    rxjs: '^7.8.1',
     '@nestjs/config': '^3.0.0',
   };
 

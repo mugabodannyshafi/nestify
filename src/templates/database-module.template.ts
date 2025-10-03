@@ -1,7 +1,6 @@
 import { Database } from '../constants/enums';
 
 export function createDatabaseModule(database: Database): string {
-
   if (database === Database.MONGODB) {
     return `import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -31,7 +30,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 export class DatabaseModule {}
 `;
   }
-
 
   return `import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';

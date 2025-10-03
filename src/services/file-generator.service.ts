@@ -34,7 +34,7 @@ export class FileGeneratorService {
         answers.description,
         answers.author,
         answers.useSwagger,
-        answers.database
+        answers.database,
       ),
     );
 
