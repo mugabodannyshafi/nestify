@@ -147,7 +147,7 @@ volumes:`;
     environment:
       MYSQL_ROOT_PASSWORD: '\${DB_PASSWORD}'
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: '\${DB_DATABASE}'
+      MYSQL_DATABASE: '\${DB_NAME}'
       MYSQL_USER: '\${DB_USERNAME}'
       MYSQL_PASSWORD: '\${DB_PASSWORD}'
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
@@ -166,7 +166,7 @@ volumes:`;
     environment:
       MYSQL_ROOT_PASSWORD: '\${DB_PASSWORD}'
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: '\${DB_DATABASE}_test'
+      MYSQL_DATABASE: '\${DB_NAME}_test'
       MYSQL_USER: '\${DB_USERNAME}'
       MYSQL_PASSWORD: '\${DB_PASSWORD}'
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
@@ -188,13 +188,13 @@ volumes:`;
     environment:
       POSTGRES_USER: '\${DB_USERNAME}'
       POSTGRES_PASSWORD: '\${DB_PASSWORD}'
-      POSTGRES_DB: '\${DB_DATABASE}'
+      POSTGRES_DB: '\${DB_NAME}'
     volumes:
       - 'app-postgres:/var/lib/postgresql/data'
     networks:
       - app-net
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U \${DB_USERNAME}']
+      test: ['CMD-SHELL', 'pg_isready -U \${DB_USERNAME} -d \${DB_NAME}']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -204,13 +204,13 @@ volumes:`;
     environment:
       POSTGRES_USER: '\${DB_USERNAME}'
       POSTGRES_PASSWORD: '\${DB_PASSWORD}'
-      POSTGRES_DB: '\${DB_DATABASE}_test'
+      POSTGRES_DB: '\${DB_NAME}_test'
     volumes:
       - 'app-postgres-testing:/var/lib/postgresql/data'
     networks:
       - app-net
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U \${DB_USERNAME}']
+      test: ['CMD-SHELL', 'pg_isready -U \${DB_USERNAME} -d \${DB_NAME}_test']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -223,13 +223,13 @@ volumes:`;
     environment:
       MONGO_INITDB_ROOT_USERNAME: '\${DB_USERNAME}'
       MONGO_INITDB_ROOT_PASSWORD: '\${DB_PASSWORD}'
-      MONGO_INITDB_DATABASE: '\${DB_DATABASE}'
+      MONGO_INITDB_NAME: '\${DB_NAME}'
     volumes:
       - 'app-mongo:/data/db'
     networks:
       - app-net
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/\${DB_DATABASE} --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/\${DB_NAME} --quiet
       interval: 5s
       timeout: 5s
       retries: 10
@@ -239,13 +239,13 @@ volumes:`;
     environment:
       MONGO_INITDB_ROOT_USERNAME: '\${DB_USERNAME}'
       MONGO_INITDB_ROOT_PASSWORD: '\${DB_PASSWORD}'
-      MONGO_INITDB_DATABASE: '\${DB_DATABASE}_test'
+      MONGO_INITDB_NAME: '\${DB_NAME}_test'
     volumes:
       - 'app-mongo-testing:/data/db'
     networks:
       - app-net
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/\${DB_DATABASE}_test --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/\${DB_NAME}_test --quiet
       interval: 5s
       timeout: 5s
       retries: 10

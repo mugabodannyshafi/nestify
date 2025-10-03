@@ -69,6 +69,7 @@ describe('FileGeneratorService', () => {
         'Test description',
         'Test Author',
         true,
+        Database.POSTGRES,
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         '/test/path/package.json',
@@ -188,6 +189,43 @@ describe('FileGeneratorService', () => {
         '/test/path/src/app.service.spec.ts',
         mockServiceSpec,
       );
+    });
+  });
+
+  describe('generateDatabaseModule', () => {
+    it('should generate database module file based on selected database', () => {
+      const mockDatabaseModule = 'database module content';
+      jest
+        .spyOn(
+          require('../../templates/database-module.template'),
+          'createDatabaseModule',
+        )
+        .mockReturnValue(mockDatabaseModule);
+
+      FileGeneratorService.generateDatabaseFiles(mockConfig);
+
+      expect(fs.ensureDirSync).toHaveBeenCalledWith('/test/path/src/database');
+
+      expect(
+        require('../../templates/database-module.template')
+          .createDatabaseModule,
+      ).toHaveBeenCalledWith(Database.POSTGRES);
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        '/test/path/src/database/database.module.ts',
+        mockDatabaseModule,
+      );
+    });
+
+    it('should not generate database module if no database is selected', () => {
+      const configWithoutDatabase: ProjectConfig = {
+        ...mockConfig,
+        answers: { ...mockConfig.answers, database: undefined },
+      };
+
+      FileGeneratorService.generateDatabaseFiles(configWithoutDatabase);
+
+      expect(fs.ensureDirSync).not.toHaveBeenCalled();
+      expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
   });
 

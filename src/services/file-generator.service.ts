@@ -18,6 +18,8 @@ import { createAppServiceSpec } from '../templates/app-service.spec.template';
 import { createAppE2ESpec } from '../templates/app-e2e-spec.template';
 import { createJestE2EConfig } from '../templates/jest-e2e-config.template';
 import { createReadme } from '../templates/readme.template';
+import { createDatabaseModule } from '../templates/database-module.template';
+import { Database } from '../constants/enums';
 import { PackageInstallerService } from './package-installer.service';
 
 export class FileGeneratorService {
@@ -32,6 +34,7 @@ export class FileGeneratorService {
         answers.description,
         answers.author,
         answers.useSwagger,
+        answers.database,
       ),
     );
 
@@ -49,6 +52,7 @@ export class FileGeneratorService {
         2,
       ),
     );
+    return;
   }
 
   static generateSourceFiles(config: ProjectConfig): void {
@@ -75,6 +79,20 @@ export class FileGeneratorService {
     fs.writeFileSync(
       path.join(srcPath, 'app.service.spec.ts'),
       createAppServiceSpec(),
+    );
+  }
+
+  static generateDatabaseFiles(config: ProjectConfig): void {
+    let database = config.answers.database;
+    if (!database || !config.answers.useDocker) return;
+
+    const dbPath = path.join(config.path, 'src/database');
+
+    fs.ensureDirSync(dbPath);
+
+    fs.writeFileSync(
+      path.join(dbPath, 'database.module.ts'),
+      createDatabaseModule(database),
     );
   }
 
