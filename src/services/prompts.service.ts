@@ -40,18 +40,6 @@ export class PromptsService {
         default: Database.MYSQL,
         when: (answers) => answers.useDocker,
       },
-      {
-        type: 'confirm',
-        name: 'useSwagger',
-        message: 'Add Swagger documentation?',
-        default: true,
-      },
-      {
-        type: 'confirm',
-        name: 'useGitHubActions',
-        message: 'Add GitHub Actions for CI/CD?',
-        default: true,
-      },
     ]);
   }
 }

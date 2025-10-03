@@ -3,7 +3,6 @@ export function createPackageJson(
   projectName: string,
   description: string,
   author: string,
-  useSwagger: boolean = true,
   database?: string,
 ): string {
   const packageJson = {

@@ -1,4 +1,4 @@
-import { PackageManager } from '../../constants/enums';
+import { Database, PackageManager } from '../../constants/enums';
 
 jest.mock('child_process');
 jest.mock('ora');
@@ -43,21 +43,8 @@ describe('PackageInstallerService', () => {
   });
 
   describe('getDependencies', () => {
-    it('should return base dependencies without swagger', () => {
-      const deps = PackageInstallerService.getDependencies(false);
-
-      expect(deps).toEqual([
-        '@nestjs/common',
-        '@nestjs/core',
-        '@nestjs/platform-express',
-        '@nestjs/config',
-        'reflect-metadata',
-        'rxjs',
-      ]);
-    });
-
-    it('should include swagger dependency when useSwagger is true', () => {
-      const deps = PackageInstallerService.getDependencies(true);
+    it('should include swagger dependency when useSwagger ', () => {
+      const deps = PackageInstallerService.getDependencies();
 
       expect(deps).toContain('@nestjs/swagger');
       expect(deps).toHaveLength(7);
@@ -173,7 +160,7 @@ describe('PackageInstallerService', () => {
       await PackageInstallerService.install(
         projectPath,
         PackageManager.NPM,
-        true,
+        Database.POSTGRES,
       );
 
       expect(mockExecAsync).toHaveBeenCalledTimes(2);
@@ -189,19 +176,6 @@ describe('PackageInstallerService', () => {
       expect(secondCall[0]).toContain('npm install --save-dev');
       expect(secondCall[0]).toContain('@nestjs/cli');
       expect(secondCall[0]).toContain('typescript');
-    });
-
-    it('should not include swagger when useSwagger is false', async () => {
-      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
-
-      await PackageInstallerService.install(
-        projectPath,
-        PackageManager.NPM,
-        false,
-      );
-
-      const firstCall = mockExecAsync.mock.calls[0];
-      expect(firstCall[0]).not.toContain('@nestjs/swagger');
     });
 
     it('should execute with correct options for both calls', async () => {

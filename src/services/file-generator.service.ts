@@ -33,7 +33,6 @@ export class FileGeneratorService {
         name,
         answers.description,
         answers.author,
-        answers.useSwagger,
         answers.database,
       ),
     );
@@ -60,10 +59,7 @@ export class FileGeneratorService {
     const srcPath = path.join(projectPath, 'src');
 
     // Main application files
-    fs.writeFileSync(
-      path.join(srcPath, 'main.ts'),
-      createMainTs(answers.useSwagger),
-    );
+    fs.writeFileSync(path.join(srcPath, 'main.ts'), createMainTs());
     fs.writeFileSync(path.join(srcPath, 'app.module.ts'), createAppModule());
     fs.writeFileSync(
       path.join(srcPath, 'app.controller.ts'),
@@ -140,8 +136,6 @@ export class FileGeneratorService {
   }
 
   static generateGitHubActionsFiles(config: ProjectConfig): void {
-    if (!config.answers.useGitHubActions) return;
-
     const workflowsPath = path.join(config.path, '.github/workflows');
     fs.ensureDirSync(workflowsPath);
 
@@ -158,7 +152,6 @@ export class FileGeneratorService {
       config.answers.description,
       config.answers.packageManager,
       config.answers.useDocker,
-      config.answers.useGitHubActions,
     );
 
     fs.writeFileSync(path.join(config.path, 'README.md'), readmeContent);
@@ -168,7 +161,6 @@ export class FileGeneratorService {
     await PackageInstallerService.install(
       config.path,
       config.answers.packageManager,
-      config.answers.useSwagger,
       config.answers.database,
     );
   }

@@ -21,8 +21,6 @@ describe('PromptsService', () => {
         description: 'Test app',
         author: 'Test Author',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -57,16 +55,6 @@ describe('PromptsService', () => {
             name: 'database',
             message: 'Which database would you like to use with Docker?',
           }),
-          expect.objectContaining({
-            type: 'confirm',
-            name: 'useSwagger',
-            message: 'Add Swagger documentation?',
-          }),
-          expect.objectContaining({
-            type: 'confirm',
-            name: 'useGitHubActions',
-            message: 'Add GitHub Actions for CI/CD?',
-          }),
         ]),
       );
     });
@@ -78,8 +66,6 @@ describe('PromptsService', () => {
         author: 'John Doe',
         useDocker: true,
         database: Database.POSTGRES,
-        useSwagger: true,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -95,8 +81,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -117,8 +101,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -139,8 +121,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -163,8 +143,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -183,8 +161,6 @@ describe('PromptsService', () => {
         description: 'A NestJS application',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -205,8 +181,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -225,8 +199,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -239,58 +211,12 @@ describe('PromptsService', () => {
       expect(dockerPrompt.default).toBe(false);
     });
 
-    it('should set useSwagger default to true', async () => {
-      const mockAnswers: ProjectAnswers = {
-        packageManager: PackageManager.NPM,
-        description: 'Test',
-        author: '',
-        useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
-      };
-
-      mockPrompt.mockResolvedValue(mockAnswers);
-
-      await PromptsService.getProjectDetails();
-
-      const promptCall = mockPrompt.mock.calls[0][0];
-      const swaggerPrompt = promptCall.find(
-        (q: any) => q.name === 'useSwagger',
-      );
-
-      expect(swaggerPrompt.default).toBe(true);
-    });
-
-    it('should set useGitHubActions default to true', async () => {
-      const mockAnswers: ProjectAnswers = {
-        packageManager: PackageManager.NPM,
-        description: 'Test',
-        author: '',
-        useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
-      };
-
-      mockPrompt.mockResolvedValue(mockAnswers);
-
-      await PromptsService.getProjectDetails();
-
-      const promptCall = mockPrompt.mock.calls[0][0];
-      const githubActionsPrompt = promptCall.find(
-        (q: any) => q.name === 'useGitHubActions',
-      );
-
-      expect(githubActionsPrompt.default).toBe(true);
-    });
-
     it('should set database default to MySQL', async () => {
       const mockAnswers: ProjectAnswers = {
         packageManager: PackageManager.NPM,
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -309,8 +235,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -332,8 +256,6 @@ describe('PromptsService', () => {
           description: 'Test',
           author: '',
           useDocker: false,
-          useSwagger: true,
-          useGitHubActions: true,
         };
 
         mockPrompt.mockResolvedValue(mockAnswers);
@@ -352,8 +274,6 @@ describe('PromptsService', () => {
           author: '',
           useDocker: true,
           database: db,
-          useSwagger: true,
-          useGitHubActions: true,
         };
 
         mockPrompt.mockResolvedValue(mockAnswers);
@@ -370,8 +290,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -389,8 +307,6 @@ describe('PromptsService', () => {
         author: '',
         useDocker: true,
         database: Database.POSTGRES,
-        useSwagger: true,
-        useGitHubActions: true,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);

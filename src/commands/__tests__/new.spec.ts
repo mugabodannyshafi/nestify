@@ -41,8 +41,6 @@ describe('newCommand', () => {
     author: 'Test Author',
     useDocker: true,
     database: Database.POSTGRES,
-    useSwagger: true,
-    useGitHubActions: true,
   };
 
   const mockProjectPath = path.resolve(process.cwd(), mockProjectName);
@@ -165,7 +163,6 @@ describe('newCommand', () => {
       expect(PackageInstallerService.install).toHaveBeenCalledWith(
         mockProjectPath,
         PackageManager.NPM,
-        true,
         Database.POSTGRES,
       );
     });
