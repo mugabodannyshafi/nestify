@@ -20,6 +20,7 @@ import { createJestE2EConfig } from '../templates/jest-e2e-config.template';
 import { createReadme } from '../templates/readme.template';
 import { createDatabaseModule } from '../templates/database-module.template';
 import { Database } from '../constants/enums';
+import { PackageInstallerService } from './package-installer.service';
 
 export class FileGeneratorService {
   static generateBaseFiles(config: ProjectConfig): void {
@@ -161,5 +162,13 @@ export class FileGeneratorService {
     );
 
     fs.writeFileSync(path.join(config.path, 'README.md'), readmeContent);
+  }
+
+  static async installDependencies(config: ProjectConfig): Promise<void> {
+    await PackageInstallerService.install(
+      config.path,
+      config.answers.packageManager,
+      config.answers.useSwagger,
+    );
   }
 }
