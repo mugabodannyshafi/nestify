@@ -16,12 +16,13 @@ import chalk from 'chalk';
 
 describe('PackageInstallerService', () => {
   let mockSpinner: any;
-  let mockChdir: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
   let consoleLogSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockExecAsync.mockClear();
+    mockExecAsync.mockReset();
 
     mockSpinner = {
       start: jest.fn().mockReturnThis(),
@@ -32,35 +33,50 @@ describe('PackageInstallerService', () => {
 
     (ora as jest.Mock).mockReturnValue(mockSpinner);
 
-    mockChdir = jest.spyOn(process, 'chdir').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
   });
 
   afterEach(() => {
-    mockChdir.mockRestore();
     consoleErrorSpy.mockRestore();
     consoleLogSpy.mockRestore();
   });
 
+  describe('getDependencies', () => {
+    it('should return base dependencies without swagger', () => {
+      const deps = PackageInstallerService.getDependencies(false);
+
+      expect(deps).toEqual([
+        '@nestjs/common',
+        '@nestjs/core',
+        '@nestjs/platform-express',
+        'reflect-metadata',
+        'rxjs',
+      ]);
+    });
+
+    it('should include swagger dependency when useSwagger is true', () => {
+      const deps = PackageInstallerService.getDependencies(true);
+
+      expect(deps).toContain('@nestjs/swagger');
+      expect(deps).toHaveLength(6);
+    });
+  });
+
+  describe('getDevDependencies', () => {
+    it('should return all dev dependencies', () => {
+      const devDeps = PackageInstallerService.getDevDependencies();
+
+      expect(devDeps).toContain('@nestjs/cli');
+      expect(devDeps).toContain('@nestjs/testing');
+      expect(devDeps).toContain('typescript');
+      expect(devDeps).toContain('jest');
+      expect(devDeps).toHaveLength(23);
+    });
+  });
+
   describe('getInstallCommand', () => {
-    it('should return yarn command for YARN package manager', () => {
-      const command = PackageInstallerService.getInstallCommand(
-        PackageManager.YARN,
-      );
-
-      expect(command).toBe('yarn');
-    });
-
-    it('should return pnpm install command for PNPM package manager', () => {
-      const command = PackageInstallerService.getInstallCommand(
-        PackageManager.PNPM,
-      );
-
-      expect(command).toBe('pnpm install');
-    });
-
-    it('should return npm install command for NPM package manager', () => {
+    it('should return base install command when no packages provided', () => {
       const command = PackageInstallerService.getInstallCommand(
         PackageManager.NPM,
       );
@@ -68,12 +84,73 @@ describe('PackageInstallerService', () => {
       expect(command).toBe('npm install');
     });
 
-    it('should return npm install as default for unknown package manager', () => {
+    it('should return base install command when empty packages array provided', () => {
       const command = PackageInstallerService.getInstallCommand(
-        'unknown' as PackageManager,
+        PackageManager.NPM,
+        [],
       );
 
       expect(command).toBe('npm install');
+    });
+
+    it('should return npm install command with packages', () => {
+      const command = PackageInstallerService.getInstallCommand(
+        PackageManager.NPM,
+        ['package1', 'package2'],
+        false,
+      );
+
+      expect(command).toBe('npm install  package1 package2');
+    });
+
+    it('should return npm install command with dev flag', () => {
+      const command = PackageInstallerService.getInstallCommand(
+        PackageManager.NPM,
+        ['package1', 'package2'],
+        true,
+      );
+
+      expect(command).toBe('npm install --save-dev package1 package2');
+    });
+
+    it('should return yarn add command for YARN package manager', () => {
+      const command = PackageInstallerService.getInstallCommand(
+        PackageManager.YARN,
+        ['package1', 'package2'],
+        false,
+      );
+
+      expect(command).toBe('yarn add  package1 package2');
+    });
+
+    it('should return yarn add with dev flag', () => {
+      const command = PackageInstallerService.getInstallCommand(
+        PackageManager.YARN,
+        ['package1'],
+        true,
+      );
+
+      expect(command).toBe('yarn add -D package1');
+    });
+
+    it('should return pnpm add command for PNPM package manager', () => {
+      const command = PackageInstallerService.getInstallCommand(
+        PackageManager.PNPM,
+        ['package1', 'package2'],
+        false,
+      );
+
+      expect(command).toBe('pnpm add  package1 package2');
+    });
+
+    it('should return pnpm add with dev flag', () => {
+      const command = PackageInstallerService.getInstallCommand(
+        PackageManager.PNPM,
+        ['package1'],
+        true,
+      );
+
+      expect(command).toBe('pnpm add -D package1');
     });
   });
 
@@ -89,48 +166,83 @@ describe('PackageInstallerService', () => {
       expect(mockSpinner.start).toHaveBeenCalled();
     });
 
-    it('should change to project directory', async () => {
+    it('should install dependencies and dev dependencies separately', async () => {
       mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
-      await PackageInstallerService.install(projectPath, PackageManager.NPM);
+      await PackageInstallerService.install(
+        projectPath,
+        PackageManager.NPM,
+        true,
+      );
 
-      expect(process.chdir).toHaveBeenCalledWith(projectPath);
+      expect(mockExecAsync).toHaveBeenCalledTimes(2);
+
+      // Check first call for regular dependencies
+      const firstCall = mockExecAsync.mock.calls[0];
+      expect(firstCall[0]).toContain('npm install');
+      expect(firstCall[0]).toContain('@nestjs/common');
+      expect(firstCall[0]).toContain('@nestjs/swagger');
+
+      // Check second call for dev dependencies
+      const secondCall = mockExecAsync.mock.calls[1];
+      expect(secondCall[0]).toContain('npm install --save-dev');
+      expect(secondCall[0]).toContain('@nestjs/cli');
+      expect(secondCall[0]).toContain('typescript');
     });
 
-    it('should execute npm install command with correct options', async () => {
+    it('should not include swagger when useSwagger is false', async () => {
+      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+
+      await PackageInstallerService.install(
+        projectPath,
+        PackageManager.NPM,
+        false,
+      );
+
+      const firstCall = mockExecAsync.mock.calls[0];
+      expect(firstCall[0]).not.toContain('@nestjs/swagger');
+    });
+
+    it('should execute with correct options for both calls', async () => {
       mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
       await PackageInstallerService.install(projectPath, PackageManager.NPM);
 
-      expect(mockExecAsync).toHaveBeenCalledWith('npm install', {
-        cwd: projectPath,
-        timeout: 300000,
-        env: { ...process.env, NODE_ENV: 'development' },
+      expect(mockExecAsync).toHaveBeenCalledTimes(2);
+
+      mockExecAsync.mock.calls.forEach((call) => {
+        expect(call[1]).toEqual({
+          cwd: projectPath,
+          timeout: 300000,
+          env: { ...process.env, NODE_ENV: 'development' },
+        });
       });
     });
 
-    it('should execute yarn command for YARN package manager', async () => {
+    it('should use yarn commands for YARN package manager', async () => {
       mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
       await PackageInstallerService.install(projectPath, PackageManager.YARN);
 
-      expect(mockExecAsync).toHaveBeenCalledWith('yarn', {
-        cwd: projectPath,
-        timeout: 300000,
-        env: { ...process.env, NODE_ENV: 'development' },
-      });
+      const firstCall = mockExecAsync.mock.calls[0];
+      expect(firstCall[0]).toContain('yarn add');
+      expect(firstCall[0]).not.toContain('-D');
+
+      const secondCall = mockExecAsync.mock.calls[1];
+      expect(secondCall[0]).toContain('yarn add -D');
     });
 
-    it('should execute pnpm install command for PNPM package manager', async () => {
+    it('should use pnpm commands for PNPM package manager', async () => {
       mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
 
       await PackageInstallerService.install(projectPath, PackageManager.PNPM);
 
-      expect(mockExecAsync).toHaveBeenCalledWith('pnpm install', {
-        cwd: projectPath,
-        timeout: 300000,
-        env: { ...process.env, NODE_ENV: 'development' },
-      });
+      const firstCall = mockExecAsync.mock.calls[0];
+      expect(firstCall[0]).toContain('pnpm add');
+      expect(firstCall[0]).not.toContain('-D');
+
+      const secondCall = mockExecAsync.mock.calls[1];
+      expect(secondCall[0]).toContain('pnpm add -D');
     });
 
     it('should show success message when installation succeeds', async () => {
@@ -156,11 +268,13 @@ describe('PackageInstallerService', () => {
       );
     });
 
-    it('should throw error when stderr contains ERR!', async () => {
-      mockExecAsync.mockResolvedValue({
-        stdout: '',
-        stderr: 'npm ERR! something went wrong',
-      });
+    it('should throw error when stderr contains ERR! in dependencies', async () => {
+      mockExecAsync
+        .mockResolvedValueOnce({
+          stdout: '',
+          stderr: 'npm ERR! something went wrong',
+        })
+        .mockResolvedValueOnce({ stdout: '', stderr: '' });
 
       await expect(
         PackageInstallerService.install(projectPath, PackageManager.NPM),
@@ -171,7 +285,26 @@ describe('PackageInstallerService', () => {
       );
     });
 
+    it('should throw error when stderr contains ERR! in dev dependencies', async () => {
+      mockExecAsync.mockClear();
+      mockExecAsync
+        .mockResolvedValueOnce({ stdout: '', stderr: '' })
+        .mockResolvedValueOnce({
+          stdout: '',
+          stderr: 'npm ERR! dev dependency error',
+        });
+
+      await expect(
+        PackageInstallerService.install(projectPath, PackageManager.NPM),
+      ).rejects.toThrow('npm ERR! dev dependency error');
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith(
+        'Failed to install dependencies',
+      );
+    });
+
     it('should fail spinner and display error message on installation failure', async () => {
+      mockExecAsync.mockClear();
       const error = new Error('Installation failed');
       mockExecAsync.mockRejectedValue(error);
 
@@ -211,7 +344,9 @@ describe('PackageInstallerService', () => {
       }
 
       expect(console.log).toHaveBeenCalledWith(
-        chalk.yellow('\n⚠️  Project created but dependencies not installed.'),
+        chalk.yellow(
+          '\n⚠️  Project created but some dependencies not installed.',
+        ),
       );
       expect(console.log).toHaveBeenCalledWith(
         chalk.cyan('\nTo install dependencies manually:'),
@@ -220,61 +355,6 @@ describe('PackageInstallerService', () => {
         chalk.white(`  1. cd ${projectPath}`),
       );
       expect(console.log).toHaveBeenCalledWith(chalk.white(`  2. npm install`));
-      expect(console.log).toHaveBeenCalledWith(
-        chalk.white(`  3. npm run start:dev\n`),
-      );
-    });
-
-    it('should display correct manual instructions for yarn', async () => {
-      const error = new Error('Installation failed');
-      mockExecAsync.mockRejectedValue(error);
-
-      try {
-        await PackageInstallerService.install(projectPath, PackageManager.YARN);
-      } catch (e) {
-        // Expected to throw
-      }
-
-      expect(console.log).toHaveBeenCalledWith(chalk.white(`  2. yarn`));
-      expect(console.log).toHaveBeenCalledWith(
-        chalk.white(`  3. yarn run start:dev\n`),
-      );
-    });
-
-    it('should display correct manual instructions for pnpm', async () => {
-      const error = new Error('Installation failed');
-      mockExecAsync.mockRejectedValue(error);
-
-      try {
-        await PackageInstallerService.install(projectPath, PackageManager.PNPM);
-      } catch (e) {
-        // Expected to throw
-      }
-
-      expect(console.log).toHaveBeenCalledWith(
-        chalk.white(`  2. pnpm install`),
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        chalk.white(`  3. pnpm run start:dev\n`),
-      );
-    });
-
-    it('should use correct timeout for installation', async () => {
-      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
-
-      await PackageInstallerService.install(projectPath, PackageManager.NPM);
-
-      const callArgs = mockExecAsync.mock.calls[0][1];
-      expect(callArgs.timeout).toBe(300000);
-    });
-
-    it('should set NODE_ENV to development', async () => {
-      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
-
-      await PackageInstallerService.install(projectPath, PackageManager.NPM);
-
-      const callArgs = mockExecAsync.mock.calls[0][1];
-      expect(callArgs.env.NODE_ENV).toBe('development');
     });
 
     it('should rethrow error after displaying instructions', async () => {
@@ -284,6 +364,171 @@ describe('PackageInstallerService', () => {
       await expect(
         PackageInstallerService.install(projectPath, PackageManager.NPM),
       ).rejects.toThrow(error);
+    });
+  });
+
+  describe('installFromPackageJson', () => {
+    const projectPath = '/test/project/path';
+
+    it('should start spinner with correct message', async () => {
+      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+
+      await PackageInstallerService.installFromPackageJson(
+        projectPath,
+        PackageManager.NPM,
+      );
+
+      expect(ora).toHaveBeenCalledWith('Installing dependencies...');
+      expect(mockSpinner.start).toHaveBeenCalled();
+    });
+
+    it('should execute base install command', async () => {
+      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+
+      await PackageInstallerService.installFromPackageJson(
+        projectPath,
+        PackageManager.NPM,
+      );
+
+      expect(mockExecAsync).toHaveBeenCalledWith('npm install', {
+        cwd: projectPath,
+        timeout: 300000,
+        env: { ...process.env, NODE_ENV: 'development' },
+      });
+    });
+
+    it('should use yarn for YARN package manager', async () => {
+      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+
+      await PackageInstallerService.installFromPackageJson(
+        projectPath,
+        PackageManager.YARN,
+      );
+
+      expect(mockExecAsync).toHaveBeenCalledWith('yarn', {
+        cwd: projectPath,
+        timeout: 300000,
+        env: { ...process.env, NODE_ENV: 'development' },
+      });
+    });
+
+    it('should use pnpm install for PNPM package manager', async () => {
+      mockExecAsync.mockResolvedValue({ stdout: '', stderr: '' });
+
+      await PackageInstallerService.installFromPackageJson(
+        projectPath,
+        PackageManager.PNPM,
+      );
+
+      expect(mockExecAsync).toHaveBeenCalledWith('pnpm install', {
+        cwd: projectPath,
+        timeout: 300000,
+        env: { ...process.env, NODE_ENV: 'development' },
+      });
+    });
+
+    it('should show success message when installation succeeds', async () => {
+      mockExecAsync.mockResolvedValue({ stdout: 'success', stderr: '' });
+
+      await PackageInstallerService.installFromPackageJson(
+        projectPath,
+        PackageManager.NPM,
+      );
+
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(
+        'Dependencies installed successfully!',
+      );
+    });
+
+    it('should handle warnings in stderr without throwing', async () => {
+      mockExecAsync.mockResolvedValue({
+        stdout: '',
+        stderr: 'WARN deprecated package',
+      });
+
+      await PackageInstallerService.installFromPackageJson(
+        projectPath,
+        PackageManager.NPM,
+      );
+
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(
+        'Dependencies installed successfully!',
+      );
+    });
+
+    it('should throw error when stderr contains ERR!', async () => {
+      mockExecAsync.mockResolvedValue({
+        stdout: '',
+        stderr: 'npm ERR! something went wrong',
+      });
+
+      await expect(
+        PackageInstallerService.installFromPackageJson(
+          projectPath,
+          PackageManager.NPM,
+        ),
+      ).rejects.toThrow('npm ERR! something went wrong');
+
+      expect(mockSpinner.fail).toHaveBeenCalledWith(
+        'Failed to install dependencies',
+      );
+    });
+
+    it('should display manual installation instructions including start command', async () => {
+      const error = new Error('Installation failed');
+      mockExecAsync.mockRejectedValue(error);
+
+      try {
+        await PackageInstallerService.installFromPackageJson(
+          projectPath,
+          PackageManager.NPM,
+        );
+      } catch (e) {
+        // Expected to throw
+      }
+
+      expect(console.log).toHaveBeenCalledWith(
+        chalk.yellow('\n⚠️  Project created but dependencies not installed.'),
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        chalk.white(`  3. npm run start:dev\n`),
+      );
+    });
+
+    it('should display correct start command for yarn', async () => {
+      const error = new Error('Installation failed');
+      mockExecAsync.mockRejectedValue(error);
+
+      try {
+        await PackageInstallerService.installFromPackageJson(
+          projectPath,
+          PackageManager.YARN,
+        );
+      } catch (e) {
+        // Expected to throw
+      }
+
+      expect(console.log).toHaveBeenCalledWith(
+        chalk.white(`  3. yarn start:dev\n`),
+      );
+    });
+
+    it('should display correct start command for pnpm', async () => {
+      const error = new Error('Installation failed');
+      mockExecAsync.mockRejectedValue(error);
+
+      try {
+        await PackageInstallerService.installFromPackageJson(
+          projectPath,
+          PackageManager.PNPM,
+        );
+      } catch (e) {
+        // Expected to throw
+      }
+
+      expect(console.log).toHaveBeenCalledWith(
+        chalk.white(`  3. pnpm run start:dev\n`),
+      );
     });
   });
 });
