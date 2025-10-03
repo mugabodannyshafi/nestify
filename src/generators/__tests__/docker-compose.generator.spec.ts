@@ -15,6 +15,9 @@ describe('DockerComposeGenerator', () => {
       author: 'Test Author',
       useDocker,
       database,
+      useSwagger: false,
+      useGraphQL: false,
+      useGitHubActions: false,
     },
   });
 

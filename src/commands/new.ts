@@ -58,6 +58,7 @@ export async function newCommand(
         projectPath,
         answers.packageManager,
         answers.database,
+        answers.useGraphQL,
       );
 
       await FormatterService.format(projectPath, answers.packageManager);
