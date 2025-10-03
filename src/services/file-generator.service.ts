@@ -169,6 +169,7 @@ export class FileGeneratorService {
       config.path,
       config.answers.packageManager,
       config.answers.useSwagger,
+      config.answers.database,
     );
   }
 }
