@@ -165,6 +165,7 @@ describe('newCommand', () => {
       expect(PackageInstallerService.install).toHaveBeenCalledWith(
         mockProjectPath,
         PackageManager.NPM,
+        true,
       );
     });
 

@@ -1,21 +1,10 @@
+// src/templates/package-json.template.ts
 export function createPackageJson(
   projectName: string,
   description: string,
   author: string,
   useSwagger: boolean = true,
 ) {
-  const dependencies: Record<string, string> = {
-    '@nestjs/common': '^10.0.0',
-    '@nestjs/core': '^10.0.0',
-    '@nestjs/platform-express': '^10.0.0',
-    'reflect-metadata': '^0.2.0',
-    rxjs: '^7.8.1',
-  };
-
-  if (useSwagger) {
-    dependencies['@nestjs/swagger'] = '^7.3.0';
-  }
-
   const packageJson = {
     name: projectName,
     version: '0.0.1',
@@ -38,32 +27,8 @@ export function createPackageJson(
         'node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand',
       'test:e2e': 'jest --config ./test/jest-e2e.json',
     },
-    dependencies: dependencies,
-    devDependencies: {
-      '@nestjs/cli': '^10.0.0',
-      '@nestjs/schematics': '^10.0.0',
-      '@nestjs/testing': '^10.0.0',
-      '@types/express': '^4.17.17',
-      '@types/jest': '^29.5.2',
-      '@types/node': '^20.3.1',
-      '@types/supertest': '^6.0.0',
-      '@typescript-eslint/eslint-plugin': '^8.0.0',
-      '@typescript-eslint/parser': '^8.0.0',
-      '@eslint/js': '^9.0.0',
-      eslint: '^9.0.0',
-      'eslint-config-prettier': '^9.0.0',
-      'eslint-plugin-prettier': '^5.0.0',
-      jest: '^29.5.0',
-      prettier: '^3.0.0',
-      'source-map-support': '^0.5.21',
-      supertest: '^7.0.0',
-      'ts-jest': '^29.1.0',
-      'ts-loader': '^9.4.3',
-      'ts-node': '^10.9.1',
-      'tsconfig-paths': '^4.2.0',
-      typescript: '^5.1.3',
-      'typescript-eslint': '^8.0.0',
-    },
+    dependencies: {},
+    devDependencies: {},
     jest: {
       moduleFileExtensions: ['js', 'json', 'ts'],
       rootDir: 'src',
