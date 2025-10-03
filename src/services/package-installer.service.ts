@@ -7,7 +7,7 @@ import { PackageManager, Database } from '../constants/enums';
 const execAsync = promisify(exec);
 
 export class PackageInstallerService {
-  static getDependencies(database?: Database): string[] {
+  static getDependencies(database?: Database, useGraphQL?: boolean): string[] {
     const dependencies = [
       '@nestjs/common',
       '@nestjs/core',
@@ -17,6 +17,17 @@ export class PackageInstallerService {
       'reflect-metadata',
       'rxjs',
     ];
+
+    // Add GraphQL dependencies
+    if (useGraphQL) {
+      dependencies.push(
+        '@nestjs/graphql',
+        '@nestjs/apollo',
+        'graphql',
+        'apollo-server-express',
+        'dataloader',
+      );
+    }
 
     // Add database-specific dependencies
     if (database === Database.MYSQL) {
@@ -39,6 +50,7 @@ export class PackageInstallerService {
       '@types/jest',
       '@types/node',
       '@types/supertest',
+      '@types/dataloader',
       '@typescript-eslint/eslint-plugin',
       '@typescript-eslint/parser',
       '@eslint/js',
@@ -84,11 +96,12 @@ export class PackageInstallerService {
     projectPath: string,
     packageManager: PackageManager,
     database?: Database,
+    useGraphQL?: boolean,
   ): Promise<void> {
     const spinner = ora('Installing dependencies...').start();
 
     try {
-      const dependencies = this.getDependencies(database);
+      const dependencies = this.getDependencies(database, useGraphQL);
       const devDependencies = this.getDevDependencies();
 
       // Install regular dependencies

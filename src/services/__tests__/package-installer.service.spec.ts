@@ -31,7 +31,7 @@ describe('PackageInstallerService', () => {
       warn: jest.fn().mockReturnThis(),
     };
 
-    (ora as jest.Mock).mockReturnValue(mockSpinner);
+    (ora as unknown as jest.Mock).mockReturnValue(mockSpinner);
 
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -49,6 +49,16 @@ describe('PackageInstallerService', () => {
       expect(deps).toContain('@nestjs/swagger');
       expect(deps).toHaveLength(7);
     });
+
+    it('should include GraphQL dependencies when useGraphQL is true', () => {
+      const deps = PackageInstallerService.getDependencies(undefined, true);
+
+      expect(deps).toContain('@nestjs/graphql');
+      expect(deps).toContain('@nestjs/apollo');
+      expect(deps).toContain('graphql');
+      expect(deps).toContain('dataloader');
+      expect(deps).toHaveLength(12);
+    });
   });
 
   describe('getDevDependencies', () => {
@@ -59,7 +69,7 @@ describe('PackageInstallerService', () => {
       expect(devDeps).toContain('@nestjs/testing');
       expect(devDeps).toContain('typescript');
       expect(devDeps).toContain('jest');
-      expect(devDeps).toHaveLength(23);
+      expect(devDeps).toHaveLength(24);
     });
   });
 

@@ -11,7 +11,7 @@ export class GitService {
       execSync('git init', { stdio: 'ignore' });
       execSync('git add .', { stdio: 'ignore' });
       spinner.succeed('Git repository initialized with all files staged!');
-    } catch (error) {
+    } catch {
       spinner.warn('Git initialization skipped (Git may not be installed)');
     }
   }

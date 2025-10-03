@@ -22,7 +22,7 @@ describe('GitService', () => {
       fail: jest.fn().mockReturnThis(),
     };
 
-    (ora as jest.Mock).mockReturnValue(mockSpinner);
+    (ora as unknown as jest.Mock).mockReturnValue(mockSpinner);
 
     mockChdir = jest.spyOn(process, 'chdir').mockImplementation();
   });
