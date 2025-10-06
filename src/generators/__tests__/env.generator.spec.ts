@@ -54,6 +54,7 @@ describe('EnvGenerator', () => {
       expect(databaseConfig.getDatabaseEnvConfig).toHaveBeenCalledWith(
         'test-app',
         Database.POSTGRES,
+        true,
       );
       expect(files['.env']).toBe(mockDbConfig.main);
       expect(files['.env.example']).toBe(mockDbConfig.main);

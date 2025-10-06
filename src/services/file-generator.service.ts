@@ -79,8 +79,8 @@ export class FileGeneratorService {
   }
 
   static generateDatabaseFiles(config: ProjectConfig): void {
-    let database = config.answers.database;
-    if (!database || !config.answers.useDocker) return;
+    const database = config.answers.database;
+    if (!database) return;
 
     const dbPath = path.join(config.path, 'src/database');
 

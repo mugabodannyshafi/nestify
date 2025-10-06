@@ -5,10 +5,11 @@ export class EnvGenerator {
   static generate(config: ProjectConfig): Record<string, string> {
     const files: Record<string, string> = {};
 
-    if (config.answers.useDocker && config.answers.database) {
+    if (config.answers.database) {
       const dbConfig = getDatabaseEnvConfig(
         config.name,
         config.answers.database,
+        config.answers.useDocker || false,
       );
       files['.env'] = dbConfig.main;
       files['.env.example'] = dbConfig.main;

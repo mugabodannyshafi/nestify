@@ -45,15 +45,17 @@ describe('PromptsService', () => {
             name: 'author',
             message: 'Author:',
           }),
+          {
+            type: 'list',
+            name: 'database',
+            message: 'Which database would you like to use?',
+            choices: Object.values(Database),
+            default: Database.MYSQL,
+          },
           expect.objectContaining({
             type: 'confirm',
             name: 'useDocker',
             message: 'Add Docker support?',
-          }),
-          expect.objectContaining({
-            type: 'list',
-            name: 'database',
-            message: 'Which database would you like to use with Docker?',
           }),
         ]),
       );
@@ -227,26 +229,6 @@ describe('PromptsService', () => {
       const databasePrompt = promptCall.find((q: any) => q.name === 'database');
 
       expect(databasePrompt.default).toBe(Database.MYSQL);
-    });
-
-    it('should only show database prompt when useDocker is true', async () => {
-      const mockAnswers: ProjectAnswers = {
-        packageManager: PackageManager.NPM,
-        description: 'Test',
-        author: '',
-        useDocker: false,
-      };
-
-      mockPrompt.mockResolvedValue(mockAnswers);
-
-      await PromptsService.getProjectDetails();
-
-      const promptCall = mockPrompt.mock.calls[0][0];
-      const databasePrompt = promptCall.find((q: any) => q.name === 'database');
-
-      expect(databasePrompt.when).toBeDefined();
-      expect(databasePrompt.when({ useDocker: false })).toBe(false);
-      expect(databasePrompt.when({ useDocker: true })).toBe(true);
     });
 
     it('should handle all package manager options', async () => {
