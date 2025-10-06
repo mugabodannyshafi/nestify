@@ -27,18 +27,17 @@ export class PromptsService {
         default: '',
       },
       {
+        type: 'list',
+        name: 'database',
+        message: 'Which database would you like to use?',
+        choices: Object.values(Database),
+        default: Database.MYSQL,
+      },
+      {
         type: 'confirm',
         name: 'useDocker',
         message: 'Add Docker support?',
         default: false,
-      },
-      {
-        type: 'list',
-        name: 'database',
-        message: 'Which database would you like to use with Docker?',
-        choices: Object.values(Database),
-        default: Database.MYSQL,
-        when: (answers) => answers.useDocker,
       },
     ]);
   }
