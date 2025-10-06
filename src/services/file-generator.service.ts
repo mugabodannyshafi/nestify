@@ -19,7 +19,7 @@ import { createAppE2ESpec } from '../templates/app-e2e-spec.template';
 import { createJestE2EConfig } from '../templates/jest-e2e-config.template';
 import { createReadme } from '../templates/readme.template';
 import { createDatabaseModule } from '../templates/database-module.template';
-import { Database } from '../constants/enums';
+
 import { PackageInstallerService } from './package-installer.service';
 
 export class FileGeneratorService {
@@ -55,7 +55,7 @@ export class FileGeneratorService {
   }
 
   static generateSourceFiles(config: ProjectConfig): void {
-    const { path: projectPath, answers } = config;
+    const { path: projectPath } = config;
     const srcPath = path.join(projectPath, 'src');
 
     // Main application files

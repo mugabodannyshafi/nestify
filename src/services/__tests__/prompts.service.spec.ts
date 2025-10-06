@@ -261,7 +261,6 @@ describe('PromptsService', () => {
       expect(databasePrompt.default).toBe(Database.MYSQL);
     });
 
-
     it('should handle all package manager options', async () => {
       for (const pm of Object.values(PackageManager)) {
         const mockAnswers: ProjectAnswers = {

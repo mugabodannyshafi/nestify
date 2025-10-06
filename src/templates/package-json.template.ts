@@ -3,7 +3,7 @@ export function createPackageJson(
   projectName: string,
   description: string,
   author: string,
-  database?: string,
+  _database?: string,
 ): string {
   const packageJson = {
     name: projectName,

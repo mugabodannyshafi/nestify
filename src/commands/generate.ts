@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import ora, { Ora } from 'ora';
+import { toPascalCase } from '../utils/string.utils';
 
 type Schematic = 'graphql' | 'resolver' | 'schema' | 'dataloader';
 
@@ -403,11 +404,4 @@ function updateAppModuleForGraphQL() {
       fs.writeFileSync(appModulePath, content);
     }
   }
-}
-
-function toPascalCase(str: string): string {
-  return str
-    .split(/[-_\s]+/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join('');
 }
