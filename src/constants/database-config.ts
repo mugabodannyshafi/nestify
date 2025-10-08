@@ -1,4 +1,4 @@
-import { Database } from './enums';
+import { Database, ORM } from './enums';
 
 interface DatabaseEnvConfig {
   main: string;
@@ -9,6 +9,7 @@ export const getDatabaseEnvConfig = (
   projectName: string,
   database: Database,
   useDocker: boolean,
+  orm?: ORM,
 ): DatabaseEnvConfig => {
   const dbHost = useDocker ? 'db' : 'localhost';
   const dbTestHost = useDocker ? 'db-test' : 'localhost';
@@ -29,6 +30,7 @@ DB_PORT=3306
 DB_NAME=${projectName}
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
+${orm === ORM.PRISMA ? `DATABASE_URL=mysql://app_user:app_password_123@${dbHost}:3306/${projectName}` : ''}
 ${useDocker ? '\n# Database Forwarding Ports (for local access)\nFORWARD_DB_PORT=3307' : ''}
 
 # Redis
@@ -54,6 +56,7 @@ DB_PORT=3306
 DB_NAME=${projectName}_test
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
+${orm === ORM.PRISMA ? `DATABASE_URL=mysql://app_user:app_password_123@${dbTestHost}:3306/${projectName}_test` : ''}
 
 # Test Redis
 REDIS_HOST=${redisTestHost}
@@ -80,6 +83,7 @@ DB_PORT=5432
 DB_NAME=${projectName}
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
+${orm === ORM.PRISMA ? `DATABASE_URL=postgresql://app_user:app_password_123@${dbHost}:5432/${projectName}?schema=public` : ''}
 ${useDocker ? '\n# Database Forwarding Ports (for local access)\nFORWARD_DB_PORT=5433' : ''}
 
 # Redis
@@ -105,6 +109,7 @@ DB_PORT=5432
 DB_NAME=${projectName}_test
 DB_USERNAME=app_user
 DB_PASSWORD=app_password_123
+${orm === ORM.PRISMA ? `DATABASE_URL=postgresql://app_user:app_password_123@${dbTestHost}:5432/${projectName}_test?schema=public` : ''}
 
 # Test Redis
 REDIS_HOST=${redisTestHost}

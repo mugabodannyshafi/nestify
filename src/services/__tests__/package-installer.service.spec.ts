@@ -1,4 +1,4 @@
-import { Database, PackageManager } from '../../constants/enums';
+import { Database, PackageManager, ORM } from '../../constants/enums';
 
 jest.mock('child_process');
 jest.mock('ora');
@@ -43,11 +43,64 @@ describe('PackageInstallerService', () => {
   });
 
   describe('getDependencies', () => {
-    it('should include swagger dependency when useSwagger ', () => {
+    it('should include base dependencies', () => {
       const deps = PackageInstallerService.getDependencies();
 
       expect(deps).toContain('@nestjs/swagger');
+      expect(deps).toContain('@nestjs/common');
+      expect(deps).toContain('@nestjs/core');
       expect(deps).toHaveLength(7);
+    });
+
+    it('should include TypeORM dependencies for MySQL', () => {
+      const deps = PackageInstallerService.getDependencies(
+        Database.MYSQL,
+        ORM.TYPEORM,
+      );
+
+      expect(deps).toContain('@nestjs/typeorm');
+      expect(deps).toContain('typeorm');
+      expect(deps).toContain('mysql2');
+    });
+
+    it('should include TypeORM dependencies for PostgreSQL', () => {
+      const deps = PackageInstallerService.getDependencies(
+        Database.POSTGRES,
+        ORM.TYPEORM,
+      );
+
+      expect(deps).toContain('@nestjs/typeorm');
+      expect(deps).toContain('typeorm');
+      expect(deps).toContain('pg');
+    });
+
+    it('should include Prisma dependencies for MySQL with Prisma ORM', () => {
+      const deps = PackageInstallerService.getDependencies(
+        Database.MYSQL,
+        ORM.PRISMA,
+      );
+
+      expect(deps).toContain('@prisma/client');
+      expect(deps).not.toContain('@nestjs/typeorm');
+      expect(deps).not.toContain('mysql2');
+    });
+
+    it('should include Prisma dependencies for PostgreSQL with Prisma ORM', () => {
+      const deps = PackageInstallerService.getDependencies(
+        Database.POSTGRES,
+        ORM.PRISMA,
+      );
+
+      expect(deps).toContain('@prisma/client');
+      expect(deps).not.toContain('@nestjs/typeorm');
+      expect(deps).not.toContain('pg');
+    });
+
+    it('should include Mongoose dependencies for MongoDB', () => {
+      const deps = PackageInstallerService.getDependencies(Database.MONGODB);
+
+      expect(deps).toContain('@nestjs/mongoose');
+      expect(deps).toContain('mongoose');
     });
   });
 
@@ -60,6 +113,13 @@ describe('PackageInstallerService', () => {
       expect(devDeps).toContain('typescript');
       expect(devDeps).toContain('jest');
       expect(devDeps).toHaveLength(23);
+    });
+
+    it('should include Prisma in dev dependencies when using Prisma ORM', () => {
+      const devDeps = PackageInstallerService.getDevDependencies(ORM.PRISMA);
+
+      expect(devDeps).toContain('prisma');
+      expect(devDeps).toHaveLength(24);
     });
   });
 

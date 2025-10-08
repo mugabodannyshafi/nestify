@@ -164,6 +164,7 @@ describe('newCommand', () => {
         mockProjectPath,
         PackageManager.NPM,
         Database.POSTGRES,
+        undefined, // orm parameter
       );
     });
 

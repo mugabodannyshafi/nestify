@@ -57,6 +57,7 @@ export async function newCommand(
         projectPath,
         answers.packageManager,
         answers.database,
+        answers.orm,
       );
 
       await FormatterService.format(projectPath, answers.packageManager);

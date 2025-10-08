@@ -66,7 +66,7 @@ describe('FileGeneratorService', () => {
         'test-project',
         'Test description',
         'Test Author',
-        Database.POSTGRES,
+        undefined, // orm parameter
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         '/test/path/package.json',
@@ -205,7 +205,7 @@ describe('FileGeneratorService', () => {
       expect(
         require('../../templates/database-module.template')
           .createDatabaseModule,
-      ).toHaveBeenCalledWith(Database.POSTGRES);
+      ).toHaveBeenCalledWith(Database.POSTGRES, undefined);
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         '/test/path/src/database/database.module.ts',
         mockDatabaseModule,
