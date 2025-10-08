@@ -10,6 +10,11 @@ export enum Database {
   MONGODB = 'mongodb',
 }
 
+export enum ORM {
+  TYPEORM = 'TypeORM',
+  PRISMA = 'Prisma',
+}
+
 export enum Environment {
   DEVELOPMENT = 'development',
   TESTING = 'testing',

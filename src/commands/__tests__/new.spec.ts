@@ -81,7 +81,10 @@ describe('newCommand', () => {
       expect(fs.existsSync).toHaveBeenCalledWith(mockProjectPath);
       expect(PromptsService.getProjectDetails).toHaveBeenCalledWith('npm');
       expect(fs.ensureDirSync).toHaveBeenCalledWith(mockProjectPath);
-      expect(createProjectStructure).toHaveBeenCalledWith(mockProjectPath);
+      expect(createProjectStructure).toHaveBeenCalledWith(
+        mockProjectPath,
+        undefined,
+      );
     });
 
     it('should call prompts service with correct package manager', async () => {
@@ -164,6 +167,7 @@ describe('newCommand', () => {
         mockProjectPath,
         PackageManager.NPM,
         Database.POSTGRES,
+        undefined, // orm parameter
       );
     });
 

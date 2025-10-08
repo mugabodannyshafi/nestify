@@ -1,12 +1,12 @@
 import inquirer from 'inquirer';
 import { ProjectAnswers } from '../types/project.types';
-import { PackageManager, Database } from '../constants/enums';
+import { PackageManager, Database, ORM } from '../constants/enums';
 
 export class PromptsService {
   static async getProjectDetails(
     defaultPackageManager?: string,
   ): Promise<ProjectAnswers> {
-    return inquirer.prompt([
+    const answers: Partial<ProjectAnswers> = await inquirer.prompt([
       {
         type: 'list',
         name: 'packageManager',
@@ -40,5 +40,24 @@ export class PromptsService {
         default: false,
       },
     ]);
+
+    // Ask for ORM choice only if MySQL or PostgreSQL is selected
+    if (
+      answers.database === Database.MYSQL ||
+      answers.database === Database.POSTGRES
+    ) {
+      const ormAnswer = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'orm',
+          message: 'Which ORM would you like to use?',
+          choices: Object.values(ORM),
+          default: ORM.TYPEORM,
+        },
+      ]);
+      answers.orm = ormAnswer.orm;
+    }
+
+    return answers as ProjectAnswers;
   }
 }

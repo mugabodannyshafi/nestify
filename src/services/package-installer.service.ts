@@ -2,12 +2,13 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import chalk from 'chalk';
 import ora from 'ora';
-import { PackageManager, Database } from '../constants/enums';
+import { PackageManager, Database, ORM } from '../constants/enums';
+import { PrismaService } from './prisma.service';
 
 const execAsync = promisify(exec);
 
 export class PackageInstallerService {
-  static getDependencies(database?: Database): string[] {
+  static getDependencies(database?: Database, orm?: ORM): string[] {
     const dependencies = [
       '@nestjs/common',
       '@nestjs/core',
@@ -19,10 +20,20 @@ export class PackageInstallerService {
     ];
 
     // Add database-specific dependencies
-    if (database === Database.MYSQL) {
-      dependencies.push('@nestjs/typeorm', 'typeorm', 'mysql2');
-    } else if (database === Database.POSTGRES) {
-      dependencies.push('@nestjs/typeorm', 'typeorm', 'pg');
+    if (database === Database.MYSQL || database === Database.POSTGRES) {
+      if (orm === ORM.PRISMA) {
+        // Prisma dependencies
+        dependencies.push('@prisma/client');
+      } else {
+        // TypeORM dependencies (default)
+        dependencies.push('@nestjs/typeorm', 'typeorm');
+
+        if (database === Database.MYSQL) {
+          dependencies.push('mysql2');
+        } else if (database === Database.POSTGRES) {
+          dependencies.push('pg');
+        }
+      }
     } else if (database === Database.MONGODB) {
       dependencies.push('@nestjs/mongoose', 'mongoose');
     }
@@ -30,8 +41,8 @@ export class PackageInstallerService {
     return dependencies;
   }
 
-  static getDevDependencies(): string[] {
-    return [
+  static getDevDependencies(orm?: ORM): string[] {
+    const devDeps = [
       '@nestjs/cli',
       '@nestjs/schematics',
       '@nestjs/testing',
@@ -56,6 +67,13 @@ export class PackageInstallerService {
       'typescript',
       'typescript-eslint',
     ];
+
+    // Add Prisma as dev dependency if using Prisma
+    if (orm === ORM.PRISMA) {
+      devDeps.push('prisma');
+    }
+
+    return devDeps;
   }
 
   static getInstallCommand(
@@ -84,12 +102,13 @@ export class PackageInstallerService {
     projectPath: string,
     packageManager: PackageManager,
     database?: Database,
+    orm?: ORM,
   ): Promise<void> {
     const spinner = ora('Installing dependencies...').start();
 
     try {
-      const dependencies = this.getDependencies(database);
-      const devDependencies = this.getDevDependencies();
+      const dependencies = this.getDependencies(database, orm);
+      const devDependencies = this.getDevDependencies(orm);
 
       // Install regular dependencies
       const depsCommand = this.getInstallCommand(
@@ -121,6 +140,22 @@ export class PackageInstallerService {
 
       if (devStderr && devStderr.includes('ERR!')) {
         throw new Error(devStderr);
+      }
+
+      // If using Prisma, initialize it using Prisma CLI
+      if (orm === ORM.PRISMA && database) {
+        spinner.text = 'Initializing Prisma...';
+
+        // Initialize Prisma using CLI (this creates schema.prisma with proper config)
+        await PrismaService.initializePrisma(
+          projectPath,
+          database,
+          packageManager,
+        );
+
+        // Create Prisma service and module files
+        await PrismaService.createPrismaService(projectPath);
+        await PrismaService.createPrismaModule(projectPath);
       }
 
       spinner.succeed('Dependencies installed successfully!');
@@ -202,6 +237,19 @@ export class PackageInstallerService {
         return 'pnpm run start:dev';
       default:
         return 'npm run start:dev';
+    }
+  }
+
+  private static getPrismaGenerateCommand(
+    packageManager: PackageManager,
+  ): string {
+    switch (packageManager) {
+      case PackageManager.YARN:
+        return 'yarn prisma generate';
+      case PackageManager.PNPM:
+        return 'pnpm prisma generate';
+      default:
+        return 'npx prisma generate';
     }
   }
 }

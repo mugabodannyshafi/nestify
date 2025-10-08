@@ -1,4 +1,4 @@
-import { Database } from './enums';
+import { Database, ORM } from './enums';
 
 interface DatabaseEnvConfig {
   main: string;
@@ -9,6 +9,7 @@ export const getDatabaseEnvConfig = (
   projectName: string,
   database: Database,
   useDocker: boolean,
+  orm?: ORM,
 ): DatabaseEnvConfig => {
   const dbHost = useDocker ? 'db' : 'localhost';
   const dbTestHost = useDocker ? 'db-test' : 'localhost';
@@ -27,8 +28,9 @@ DB_TYPE=mysql
 DB_HOST=${dbHost}
 DB_PORT=3306
 DB_NAME=${projectName}
-DB_USERNAME=app_user
-DB_PASSWORD=app_password_123
+DB_USERNAME=root
+DB_PASSWORD=root_password_123
+${orm === ORM.PRISMA ? `DATABASE_URL=mysql://root:root_password_123@${dbHost}:3306/${projectName}` : ''}
 ${useDocker ? '\n# Database Forwarding Ports (for local access)\nFORWARD_DB_PORT=3307' : ''}
 
 # Redis
@@ -52,8 +54,9 @@ DB_TYPE=mysql
 DB_HOST=${dbTestHost}
 DB_PORT=3306
 DB_NAME=${projectName}_test
-DB_USERNAME=app_user
-DB_PASSWORD=app_password_123
+DB_USERNAME=root
+DB_PASSWORD=root_password_123
+${orm === ORM.PRISMA ? `DATABASE_URL=mysql://root:root_password_123@${dbTestHost}:3306/${projectName}_test` : ''}
 
 # Test Redis
 REDIS_HOST=${redisTestHost}
@@ -78,8 +81,9 @@ DB_TYPE=postgres
 DB_HOST=${dbHost}
 DB_PORT=5432
 DB_NAME=${projectName}
-DB_USERNAME=app_user
-DB_PASSWORD=app_password_123
+DB_USERNAME=postgres
+DB_PASSWORD=postgres_password_123
+${orm === ORM.PRISMA ? `DATABASE_URL=postgresql://postgres:postgres_password_123@${dbHost}:5432/${projectName}?schema=public` : ''}
 ${useDocker ? '\n# Database Forwarding Ports (for local access)\nFORWARD_DB_PORT=5433' : ''}
 
 # Redis
@@ -103,8 +107,9 @@ DB_TYPE=postgres
 DB_HOST=${dbTestHost}
 DB_PORT=5432
 DB_NAME=${projectName}_test
-DB_USERNAME=app_user
-DB_PASSWORD=app_password_123
+DB_USERNAME=postgres
+DB_PASSWORD=postgres_password_123
+${orm === ORM.PRISMA ? `DATABASE_URL=postgresql://postgres:postgres_password_123@${dbTestHost}:5432/${projectName}_test?schema=public` : ''}
 
 # Test Redis
 REDIS_HOST=${redisTestHost}
