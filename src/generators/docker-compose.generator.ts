@@ -1,5 +1,5 @@
 import { ProjectConfig } from '../types/project.types';
-import { Database, PackageManager } from '../constants/enums';
+import { Database, ORM, PackageManager } from '../constants/enums';
 
 export class DockerComposeGenerator {
   static generate(config: ProjectConfig): Record<string, string> {
@@ -16,6 +16,7 @@ export class DockerComposeGenerator {
       'docker-compose.yml': this.getDockerCompose(
         config.answers.database,
         config.answers.packageManager,
+        config.answers.orm,
       ),
     };
   }
@@ -77,6 +78,7 @@ coverage
   private static getDockerCompose(
     database: Database,
     packageManager: PackageManager,
+    orm?: ORM,
   ): string {
     const envVar = (name: string) => '${' + name + '}';
     const envVarWithDefault = (name: string, fallback: string) =>
@@ -107,7 +109,7 @@ coverage
     platform: linux/amd64
     volumes:
       - '.:/home/app'
-    command: bash -c "rm -rf node_modules dist && ${installCmd} && ${prismaCmd} && ${startCmd}"
+    command: bash -c "rm -rf node_modules dist && ${installCmd} && ${orm === ORM.PRISMA ? prismaCmd : ''} && ${startCmd}"
     depends_on:
       db:
         condition: service_healthy

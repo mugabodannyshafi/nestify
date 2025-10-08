@@ -1,12 +1,13 @@
 import { DockerComposeGenerator } from '../docker-compose.generator';
 import { ProjectConfig } from '../../types/project.types';
-import { Database, PackageManager } from '../../constants/enums';
+import { Database, ORM, PackageManager } from '../../constants/enums';
 
 describe('DockerComposeGenerator', () => {
   const createConfig = (
     useDocker: boolean,
     database?: Database,
     packageManager: PackageManager = PackageManager.NPM,
+    orm?: ORM,
   ): ProjectConfig => ({
     name: 'test-project',
     path: '/test/path',
@@ -16,6 +17,7 @@ describe('DockerComposeGenerator', () => {
       author: 'Test Author',
       useDocker,
       database,
+      orm,
     },
   });
 
@@ -132,7 +134,12 @@ describe('DockerComposeGenerator', () => {
     });
 
     it('should include prisma generate in startup command', () => {
-      const config = createConfig(true, Database.POSTGRES);
+      const config = createConfig(
+        true,
+        Database.POSTGRES,
+        PackageManager.NPM,
+        ORM.PRISMA,
+      );
       const files = DockerComposeGenerator.generate(config);
       const compose = files['docker-compose.yml'];
 
@@ -167,7 +174,12 @@ describe('DockerComposeGenerator', () => {
 
   describe('package manager support', () => {
     it('should use npm commands when packageManager is NPM', () => {
-      const config = createConfig(true, Database.POSTGRES, PackageManager.NPM);
+      const config = createConfig(
+        true,
+        Database.POSTGRES,
+        PackageManager.NPM,
+        ORM.PRISMA,
+      );
       const files = DockerComposeGenerator.generate(config);
 
       expect(files.Dockerfile).toContain('CMD ["npm", "run", "start:dev"]');
@@ -178,7 +190,12 @@ describe('DockerComposeGenerator', () => {
     });
 
     it('should use yarn commands when packageManager is YARN', () => {
-      const config = createConfig(true, Database.POSTGRES, PackageManager.YARN);
+      const config = createConfig(
+        true,
+        Database.POSTGRES,
+        PackageManager.YARN,
+        ORM.PRISMA,
+      );
       const files = DockerComposeGenerator.generate(config);
 
       expect(files.Dockerfile).toContain('CMD ["yarn", "run", "start:dev"]');
@@ -192,7 +209,12 @@ describe('DockerComposeGenerator', () => {
     });
 
     it('should use pnpm commands when packageManager is PNPM', () => {
-      const config = createConfig(true, Database.POSTGRES, PackageManager.PNPM);
+      const config = createConfig(
+        true,
+        Database.POSTGRES,
+        PackageManager.PNPM,
+        ORM.PRISMA,
+      );
       const files = DockerComposeGenerator.generate(config);
 
       expect(files.Dockerfile).toContain('CMD ["pnpm", "run", "start:dev"]');
