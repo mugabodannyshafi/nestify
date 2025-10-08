@@ -6,6 +6,7 @@ import { DockerComposeGenerator } from '../generators/docker-compose.generator';
 import { GitHubActionsGenerator } from '../generators/github-actions.generator';
 import { ConfigFilesGenerator } from '../generators/config-files.generator';
 import { EnvGenerator } from '../generators/env.generator';
+import { PrismaService } from './prisma.service';
 
 import { createPackageJson } from '../templates/package-json.template';
 import { createTsConfig } from '../templates/tsconfig.template';
@@ -19,7 +20,7 @@ import { createAppE2ESpec } from '../templates/app-e2e-spec.template';
 import { createJestE2EConfig } from '../templates/jest-e2e-config.template';
 import { createReadme } from '../templates/readme.template';
 import { createDatabaseModule } from '../templates/database-module.template';
-import { Database } from '../constants/enums';
+import { Database, ORM } from '../constants/enums';
 import { PackageInstallerService } from './package-installer.service';
 
 export class FileGeneratorService {
@@ -29,12 +30,7 @@ export class FileGeneratorService {
     // Package.json
     fs.writeFileSync(
       path.join(projectPath, 'package.json'),
-      createPackageJson(
-        name,
-        answers.description,
-        answers.author,
-        answers.database,
-      ),
+      createPackageJson(name, answers.description, answers.author, answers.orm),
     );
 
     // TypeScript configs
@@ -60,7 +56,10 @@ export class FileGeneratorService {
 
     // Main application files
     fs.writeFileSync(path.join(srcPath, 'main.ts'), createMainTs());
-    fs.writeFileSync(path.join(srcPath, 'app.module.ts'), createAppModule());
+    fs.writeFileSync(
+      path.join(srcPath, 'app.module.ts'),
+      createAppModule(answers.database, answers.orm),
+    );
     fs.writeFileSync(
       path.join(srcPath, 'app.controller.ts'),
       createAppController(),
@@ -80,16 +79,31 @@ export class FileGeneratorService {
 
   static generateDatabaseFiles(config: ProjectConfig): void {
     const database = config.answers.database;
+    const orm = config.answers.orm;
+
     if (!database) return;
 
-    const dbPath = path.join(config.path, 'src/database');
+    // If using Prisma, we'll initialize it using Prisma CLI later
+    // For now, just create the src/prisma directory structure
+    if (orm === ORM.PRISMA) {
+      const prismaSrcPath = path.join(config.path, 'src/prisma');
+      fs.ensureDirSync(prismaSrcPath);
 
-    fs.ensureDirSync(dbPath);
+      // Note: Prisma schema and client will be initialized via Prisma CLI
+      // in the package installer service after dependencies are installed
+    } else {
+      // For TypeORM or Mongoose, generate database module
+      const dbPath = path.join(config.path, 'src/database');
+      fs.ensureDirSync(dbPath);
 
-    fs.writeFileSync(
-      path.join(dbPath, 'database.module.ts'),
-      createDatabaseModule(database),
-    );
+      const moduleContent = createDatabaseModule(database, orm);
+      if (moduleContent) {
+        fs.writeFileSync(
+          path.join(dbPath, 'database.module.ts'),
+          moduleContent,
+        );
+      }
+    }
   }
 
   static generateTestFiles(config: ProjectConfig): void {
@@ -152,6 +166,7 @@ export class FileGeneratorService {
       config.answers.description,
       config.answers.packageManager,
       config.answers.useDocker,
+      config.answers.orm as 'prisma' | 'typeorm' | undefined,
     );
 
     fs.writeFileSync(path.join(config.path, 'README.md'), readmeContent);

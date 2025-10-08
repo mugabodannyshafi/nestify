@@ -1,6 +1,11 @@
-import { Database } from '../constants/enums';
+import { Database, ORM } from '../constants/enums';
 
-export function createDatabaseModule(database: Database): string {
+export function createDatabaseModule(database: Database, orm?: ORM): string {
+  // For Prisma, we don't need a database module as PrismaModule handles it
+  if (orm === ORM.PRISMA) {
+    return '';
+  }
+
   if (database === Database.MONGODB) {
     return `import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';

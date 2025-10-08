@@ -1,5 +1,5 @@
 import { ProjectConfig } from '../types/project.types';
-import { Database } from '../constants/enums';
+import { Database, ORM, PackageManager } from '../constants/enums';
 
 export class DockerComposeGenerator {
   static generate(config: ProjectConfig): Record<string, string> {
@@ -8,18 +8,39 @@ export class DockerComposeGenerator {
     }
 
     return {
-      Dockerfile: this.getDockerfile(config.answers.database),
+      Dockerfile: this.getDockerfile(
+        config.answers.database,
+        config.answers.packageManager,
+      ),
       '.dockerignore': this.getDockerignore(),
-      'docker-compose.yml': this.getDockerCompose(config.answers.database),
+      'docker-compose.yml': this.getDockerCompose(
+        config.answers.database,
+        config.answers.packageManager,
+        config.answers.orm,
+      ),
     };
   }
 
-  private static getDockerfile(database: Database): string {
+  private static getDockerfile(
+    database: Database,
+    packageManager: PackageManager,
+  ): string {
     const dbClient = {
       [Database.MYSQL]: 'mysql-client',
       [Database.POSTGRES]: 'postgresql-client',
       [Database.MONGODB]: 'mongodb-clients',
     }[database];
+
+    const installGlobalCLI =
+      packageManager === PackageManager.NPM ? 'RUN npm i -g @nestjs/cli' : '';
+
+    const packageManagerSetup = {
+      [PackageManager.NPM]: '',
+      [PackageManager.YARN]:
+        'RUN corepack enable && corepack prepare yarn@stable --activate',
+      [PackageManager.PNPM]:
+        'RUN corepack enable && corepack prepare pnpm@latest --activate',
+    }[packageManager];
 
     return `FROM ubuntu:24.04
 ARG NODE_VERSION=24
@@ -30,9 +51,10 @@ RUN apt install -y curl git \\
     && apt-get install -y nodejs \\
     && apt-get install -y ${dbClient} \\
     && apt-get -y autoremove \\
-    && apt-get -y clean
-RUN npm i -g @nestjs/cli
-CMD ["npm", "run", "start:dev"]`;
+    && apt-get -y clean${
+      packageManagerSetup ? `\n${packageManagerSetup}` : ''
+    }${installGlobalCLI ? `\n${installGlobalCLI}` : ''}
+CMD ["${packageManager}", "run", "start:dev"]`;
   }
 
   private static getDockerignore(): string {
@@ -53,7 +75,31 @@ coverage
 *.log`;
   }
 
-  private static getDockerCompose(database: Database): string {
+  private static getDockerCompose(
+    database: Database,
+    packageManager: PackageManager,
+    orm?: ORM,
+  ): string {
+    const envVar = (name: string) => '${' + name + '}';
+    const envVarWithDefault = (name: string, fallback: string) =>
+      '${' + name + ':-' + fallback + '}';
+
+    const installCmd =
+      packageManager === PackageManager.NPM
+        ? 'npm install'
+        : packageManager === PackageManager.YARN
+          ? 'yarn install'
+          : 'pnpm install';
+
+    const prismaCmd =
+      packageManager === PackageManager.NPM
+        ? 'npx prisma generate'
+        : packageManager === PackageManager.YARN
+          ? 'yarn prisma generate'
+          : 'pnpm prisma generate';
+
+    const startCmd = `${packageManager} run start:dev`;
+
     const baseService = `services:
   app:
     build: .
@@ -63,7 +109,7 @@ coverage
     platform: linux/amd64
     volumes:
       - '.:/home/app'
-    command: bash -c "rm -rf node_modules dist && npm install && npm run start:dev"
+    command: bash -c "rm -rf node_modules dist && ${installCmd} && ${orm === ORM.PRISMA ? prismaCmd : ''} && ${startCmd}"
     depends_on:
       db:
         condition: service_healthy
@@ -143,20 +189,18 @@ volumes:`;
   db:
     image: 'mysql/mysql-server:8.0'
     ports:
-      - '\${FORWARD_DB_PORT:-3306}:3306'
+      - '${envVarWithDefault('FORWARD_DB_PORT', '3306')}:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: '\${DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: ${envVar('DB_PASSWORD')}
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: '\${DB_NAME}'
-      MYSQL_USER: '\${DB_USERNAME}'
-      MYSQL_PASSWORD: '\${DB_PASSWORD}'
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: ${envVar('DB_NAME')}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 0
     volumes:
       - 'app-mysql:/var/lib/mysql'
     networks:
       - app-net
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-p\${DB_PASSWORD}']
+      test: ['CMD', 'mysqladmin', 'ping', "-p${envVar('DB_PASSWORD')}"]
       retries: 10
       interval: 5s
       timeout: 5s
@@ -164,18 +208,16 @@ volumes:`;
   db-test:
     image: 'mysql/mysql-server:8.0'
     environment:
-      MYSQL_ROOT_PASSWORD: '\${DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: ${envVar('DB_PASSWORD')}
       MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: '\${DB_NAME}_test'
-      MYSQL_USER: '\${DB_USERNAME}'
-      MYSQL_PASSWORD: '\${DB_PASSWORD}'
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: ${envVar('DB_NAME')}_test
+      MYSQL_ALLOW_EMPTY_PASSWORD: 0
     volumes:
       - 'app-mysql-testing:/var/lib/mysql'
     networks:
       - app-net
     healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-p\${DB_PASSWORD}']
+      test: ['CMD', 'mysqladmin', 'ping', "-p${envVar('DB_PASSWORD')}"]
       retries: 10
       interval: 5s
       timeout: 5s
@@ -184,17 +226,17 @@ volumes:`;
   db:
     image: 'postgres:16-alpine'
     ports:
-      - '\${FORWARD_DB_PORT:-5432}:5432'
+      - '${envVarWithDefault('FORWARD_DB_PORT', '5432')}:5432'
     environment:
-      POSTGRES_USER: '\${DB_USERNAME}'
-      POSTGRES_PASSWORD: '\${DB_PASSWORD}'
-      POSTGRES_DB: '\${DB_NAME}'
+      POSTGRES_USER: ${envVar('DB_USERNAME')}
+      POSTGRES_PASSWORD: ${envVar('DB_PASSWORD')}
+      POSTGRES_DB: ${envVar('DB_NAME')}
     volumes:
       - 'app-postgres:/var/lib/postgresql/data'
     networks:
       - app-net
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U \${DB_USERNAME} -d \${DB_NAME}']
+      test: ['CMD-SHELL', "pg_isready -U ${envVar('DB_USERNAME')} -d ${envVar('DB_NAME')}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -202,15 +244,15 @@ volumes:`;
   db-test:
     image: 'postgres:16-alpine'
     environment:
-      POSTGRES_USER: '\${DB_USERNAME}'
-      POSTGRES_PASSWORD: '\${DB_PASSWORD}'
-      POSTGRES_DB: '\${DB_NAME}_test'
+      POSTGRES_USER: ${envVar('DB_USERNAME')}
+      POSTGRES_PASSWORD: ${envVar('DB_PASSWORD')}
+      POSTGRES_DB: ${envVar('DB_NAME')}_test
     volumes:
       - 'app-postgres-testing:/var/lib/postgresql/data'
     networks:
       - app-net
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U \${DB_USERNAME} -d \${DB_NAME}_test']
+      test: ['CMD-SHELL', "pg_isready -U ${envVar('DB_USERNAME')} -d ${envVar('DB_NAME')}_test"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -219,17 +261,17 @@ volumes:`;
   db:
     image: 'mongo:7'
     ports:
-      - '\${FORWARD_DB_PORT:-27017}:27017'
+      - '${envVarWithDefault('FORWARD_DB_PORT', '27017')}:27017'
     environment:
-      MONGO_INITDB_ROOT_USERNAME: '\${DB_USERNAME}'
-      MONGO_INITDB_ROOT_PASSWORD: '\${DB_PASSWORD}'
-      MONGO_INITDB_NAME: '\${DB_NAME}'
+      MONGO_INITDB_ROOT_USERNAME: ${envVar('DB_USERNAME')}
+      MONGO_INITDB_ROOT_PASSWORD: ${envVar('DB_PASSWORD')}
+      MONGO_INITDB_NAME: ${envVar('DB_NAME')}
     volumes:
       - 'app-mongo:/data/db'
     networks:
       - app-net
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/\${DB_NAME} --quiet
+      test: ['CMD-SHELL', "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/${envVar('DB_NAME')} --quiet"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -237,15 +279,15 @@ volumes:`;
   db-test:
     image: 'mongo:7'
     environment:
-      MONGO_INITDB_ROOT_USERNAME: '\${DB_USERNAME}'
-      MONGO_INITDB_ROOT_PASSWORD: '\${DB_PASSWORD}'
-      MONGO_INITDB_NAME: '\${DB_NAME}_test'
+      MONGO_INITDB_ROOT_USERNAME: ${envVar('DB_USERNAME')}
+      MONGO_INITDB_ROOT_PASSWORD: ${envVar('DB_PASSWORD')}
+      MONGO_INITDB_NAME: ${envVar('DB_NAME')}_test
     volumes:
       - 'app-mongo-testing:/data/db'
     networks:
       - app-net
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/\${DB_NAME}_test --quiet
+      test: ['CMD-SHELL', "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/${envVar('DB_NAME')}_test --quiet"]
       interval: 5s
       timeout: 5s
       retries: 10

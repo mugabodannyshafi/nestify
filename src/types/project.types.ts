@@ -1,4 +1,4 @@
-import { PackageManager, Database } from '../constants/enums';
+import { PackageManager, Database, ORM } from '../constants/enums';
 
 export interface ProjectAnswers {
   packageManager: PackageManager;
@@ -6,6 +6,7 @@ export interface ProjectAnswers {
   author: string;
   useDocker: boolean;
   database?: Database;
+  orm?: ORM;
 }
 
 export interface NewCommandOptions {

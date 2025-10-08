@@ -79,11 +79,23 @@ my-awesome-app/
 
 - **Production-ready NestJS setup** with best practices
 - **Docker Compose** with database and Redis
+- **ORM Support** with Prisma (CLI-based) or TypeORM
 - **Testing** with Jest (unit & e2e)
 - **CI/CD** with GitHub Actions
 - **Code quality** with ESLint and Prettier
 - **API documentation** with Swagger (optional)
 - **Environment management** with .env files
+
+## Database & ORM Support
+
+### Prisma
+Nestify uses the official Prisma CLI to initialize your database layer, ensuring you always get the latest features and best practices.
+
+### TypeORM
+Full TypeORM support with entity-based models for MySQL, PostgreSQL.
+
+### Mongoose
+MongoDB integration with Mongoose for schema-based modeling.
 
 ## License
 

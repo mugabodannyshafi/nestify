@@ -10,6 +10,7 @@ export class EnvGenerator {
         config.name,
         config.answers.database,
         config.answers.useDocker || false,
+        config.answers.orm,
       );
       files['.env'] = dbConfig.main;
       files['.env.example'] = dbConfig.main;

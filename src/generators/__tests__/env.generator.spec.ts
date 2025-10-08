@@ -55,6 +55,7 @@ describe('EnvGenerator', () => {
         'test-app',
         Database.POSTGRES,
         true,
+        undefined, // orm parameter
       );
       expect(files['.env']).toBe(mockDbConfig.main);
       expect(files['.env.example']).toBe(mockDbConfig.main);
