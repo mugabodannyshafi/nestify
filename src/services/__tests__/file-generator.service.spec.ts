@@ -379,6 +379,7 @@ describe('FileGeneratorService', () => {
         'Test description',
         PackageManager.NPM,
         true,
+        undefined, // orm parameter
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         '/test/path/README.md',

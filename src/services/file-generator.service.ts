@@ -6,6 +6,7 @@ import { DockerComposeGenerator } from '../generators/docker-compose.generator';
 import { GitHubActionsGenerator } from '../generators/github-actions.generator';
 import { ConfigFilesGenerator } from '../generators/config-files.generator';
 import { EnvGenerator } from '../generators/env.generator';
+import { PrismaService } from './prisma.service';
 
 import { createPackageJson } from '../templates/package-json.template';
 import { createTsConfig } from '../templates/tsconfig.template';
@@ -19,9 +20,6 @@ import { createAppE2ESpec } from '../templates/app-e2e-spec.template';
 import { createJestE2EConfig } from '../templates/jest-e2e-config.template';
 import { createReadme } from '../templates/readme.template';
 import { createDatabaseModule } from '../templates/database-module.template';
-import { createPrismaSchema } from '../templates/prisma-schema.template';
-import { createPrismaService } from '../templates/prisma-service.template';
-import { createPrismaModule } from '../templates/prisma-module.template';
 import { Database, ORM } from '../constants/enums';
 import { PackageInstallerService } from './package-installer.service';
 
@@ -85,30 +83,14 @@ export class FileGeneratorService {
 
     if (!database) return;
 
-    // If using Prisma, generate Prisma-specific files
+    // If using Prisma, we'll initialize it using Prisma CLI later
+    // For now, just create the src/prisma directory structure
     if (orm === ORM.PRISMA) {
-      const prismaPath = path.join(config.path, 'prisma');
-      fs.ensureDirSync(prismaPath);
-
-      // Generate Prisma schema
-      fs.writeFileSync(
-        path.join(prismaPath, 'schema.prisma'),
-        createPrismaSchema(database),
-      );
-
-      // Generate Prisma service and module in src/prisma
       const prismaSrcPath = path.join(config.path, 'src/prisma');
       fs.ensureDirSync(prismaSrcPath);
 
-      fs.writeFileSync(
-        path.join(prismaSrcPath, 'prisma.service.ts'),
-        createPrismaService(),
-      );
-
-      fs.writeFileSync(
-        path.join(prismaSrcPath, 'prisma.module.ts'),
-        createPrismaModule(),
-      );
+      // Note: Prisma schema and client will be initialized via Prisma CLI
+      // in the package installer service after dependencies are installed
     } else {
       // For TypeORM or Mongoose, generate database module
       const dbPath = path.join(config.path, 'src/database');
@@ -184,6 +166,7 @@ export class FileGeneratorService {
       config.answers.description,
       config.answers.packageManager,
       config.answers.useDocker,
+      config.answers.orm as 'prisma' | 'typeorm' | undefined,
     );
 
     fs.writeFileSync(path.join(config.path, 'README.md'), readmeContent);

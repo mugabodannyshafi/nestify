@@ -38,7 +38,7 @@ export async function newCommand(
 
     spinner.start('Creating project structure...');
     fs.ensureDirSync(projectPath);
-    createProjectStructure(projectPath);
+    createProjectStructure(projectPath, answers.orm);
 
     FileGeneratorService.generateBaseFiles(config);
     FileGeneratorService.generateSourceFiles(config);

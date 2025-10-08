@@ -3,6 +3,7 @@ import { promisify } from 'util';
 import chalk from 'chalk';
 import ora from 'ora';
 import { PackageManager, Database, ORM } from '../constants/enums';
+import { PrismaService } from './prisma.service';
 
 const execAsync = promisify(exec);
 
@@ -141,14 +142,20 @@ export class PackageInstallerService {
         throw new Error(devStderr);
       }
 
-      // If using Prisma, run prisma generate
-      if (orm === ORM.PRISMA) {
-        spinner.text = 'Generating Prisma Client...';
-        const prismaCommand = this.getPrismaGenerateCommand(packageManager);
-        await execAsync(prismaCommand, {
-          cwd: projectPath,
-          timeout: 60000,
-        });
+      // If using Prisma, initialize it using Prisma CLI
+      if (orm === ORM.PRISMA && database) {
+        spinner.text = 'Initializing Prisma...';
+
+        // Initialize Prisma using CLI (this creates schema.prisma with proper config)
+        await PrismaService.initializePrisma(
+          projectPath,
+          database,
+          packageManager,
+        );
+
+        // Create Prisma service and module files
+        await PrismaService.createPrismaService(projectPath);
+        await PrismaService.createPrismaModule(projectPath);
       }
 
       spinner.succeed('Dependencies installed successfully!');

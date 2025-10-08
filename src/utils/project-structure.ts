@@ -1,8 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
+import { ORM } from '../constants/enums';
 
-export function createProjectStructure(projectPath: string) {
-  const directories = [
+export function createProjectStructure(projectPath: string, orm?: ORM) {
+  const baseDirectories = [
     'src',
     'src/common',
     'src/common/decorators',
@@ -13,15 +14,20 @@ export function createProjectStructure(projectPath: string) {
     'src/common/interceptors',
     'src/common/pipes',
     'src/common/middleware',
-    'src/database',
-    'src/database/entities',
-    'src/database/seeders',
     'src/modules',
     'src/shared',
     'src/shared/services',
     'src/shared/utils',
     'test',
   ];
+
+  // Add database directories only for TypeORM and Mongoose (not Prisma)
+  const databaseDirectories =
+    orm !== ORM.PRISMA
+      ? ['src/database', 'src/database/entities', 'src/database/seeders']
+      : [];
+
+  const directories = [...baseDirectories, ...databaseDirectories];
 
   directories.forEach((dir) => {
     fs.ensureDirSync(path.join(projectPath, dir));
