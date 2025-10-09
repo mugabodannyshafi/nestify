@@ -39,6 +39,12 @@ export class PromptsService {
         message: 'Add Docker support?',
         default: false,
       },
+      {
+        type: 'confirm',
+        name: 'useAuth',
+        message: 'Would you like to set up authentication?',
+        default: false,
+      },
     ]);
 
     // Ask for ORM choice only if MySQL or PostgreSQL is selected
@@ -56,6 +62,29 @@ export class PromptsService {
         },
       ]);
       answers.orm = ormAnswer.orm;
+    }
+
+    if (answers.useAuth) {
+      const authAnswer = await inquirer.prompt([
+        {
+          type: 'checkbox',
+          name: 'authStrategies',
+          message: 'Select authentication strategies:',
+          choices: [
+            { name: 'JWT', value: 'jwt', checked: true },
+            // { name: 'OAuth', value: 'oauth' },
+            // { name: 'RBAC (Role-Based Access Control)', value: 'rbac' },
+            // { name: 'Email Verification', value: 'email-verification' },
+          ],
+          validate: (answer) => {
+            if (answer.length < 1) {
+              return 'You must choose at least one authentication strategy.';
+            }
+            return true;
+          },
+        },
+      ]);
+      answers.authStrategies = authAnswer.authStrategies;
     }
 
     return answers as ProjectAnswers;

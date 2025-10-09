@@ -58,7 +58,16 @@ export async function newCommand(
         answers.packageManager,
         answers.database,
         answers.orm,
+        answers.useAuth,
+        answers.authStrategies,
       );
+
+      // THEN generate authentication files (after packages are installed)
+      if (answers.useAuth && answers.authStrategies) {
+        spinner.start('Generating authentication files...');
+        FileGeneratorService.generateAuthFiles(config);
+        spinner.succeed('Authentication files generated!');
+      }
 
       await FormatterService.format(projectPath, answers.packageManager);
       GitService.initialize(projectPath);
@@ -68,6 +77,23 @@ export async function newCommand(
           '\n⚠️  Dependencies not installed (--skip-install flag used)',
         ),
       );
+
+      if (answers.useAuth) {
+        console.log(
+          chalk.yellow(
+            '⚠️  Authentication files not generated (requires dependencies first)',
+          ),
+        );
+        console.log(chalk.cyan('\nTo complete authentication setup:'));
+        console.log(chalk.white(`  1. cd ${projectName}`));
+        console.log(
+          chalk.white(
+            `  2. ${PackageInstallerService['getBaseInstallCommand'](answers.packageManager)}`,
+          ),
+        );
+        console.log(chalk.white(`  3. nestify generate auth --strategy jwt`));
+      }
+
       console.log(
         chalk.yellow('⚠️  Code formatting skipped (requires dependencies)'),
       );
