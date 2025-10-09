@@ -41,6 +41,9 @@ describe('newCommand', () => {
     author: 'Test Author',
     useDocker: true,
     database: Database.POSTGRES,
+    useSwagger: true,
+    useGraphQL: false,
+    useGitHubActions: true,
   };
 
   const mockProjectPath = path.resolve(process.cwd(), mockProjectName);
@@ -168,6 +171,7 @@ describe('newCommand', () => {
         PackageManager.NPM,
         Database.POSTGRES,
         undefined, // orm parameter
+        false, // useGraphQL parameter
       );
     });
 

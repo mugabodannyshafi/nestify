@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
 import ora, { Ora } from 'ora';
+import { toPascalCase } from '../utils/string.utils';
 
 type Schematic = 'graphql' | 'resolver' | 'schema' | 'dataloader';
 
@@ -19,7 +20,9 @@ export async function generateCommand(schematic: string, name: string) {
     // Validate schematic type
     if (!VALID_SCHEMATICS.includes(schematic as Schematic)) {
       console.log(chalk.red(`❌ Invalid schematic: ${schematic}`));
-      console.log(chalk.cyan(`Available schematics: ${VALID_SCHEMATICS.join(', ')}`));
+      console.log(
+        chalk.cyan(`Available schematics: ${VALID_SCHEMATICS.join(', ')}`),
+      );
       process.exit(1);
     }
 
@@ -47,7 +50,11 @@ export async function generateCommand(schematic: string, name: string) {
         break;
     }
 
-    console.log(chalk.green(`\n✅ Successfully generated GraphQL ${schematic}${name ? ': ' + name : ''}!`));
+    console.log(
+      chalk.green(
+        `\n✅ Successfully generated GraphQL ${schematic}${name ? ': ' + name : ''}!`,
+      ),
+    );
   } catch (error) {
     spinner.fail('Failed to generate GraphQL component');
     console.error(chalk.red('Error:'), error);
@@ -57,41 +64,32 @@ export async function generateCommand(schematic: string, name: string) {
 
 async function setupGraphQL(spinner: Ora) {
   spinner.start('Setting up GraphQL configuration...');
-  
+
   // Create GraphQL directories
   const graphqlPath = path.join('src', 'graphql');
   const resolversPath = path.join(graphqlPath, 'resolvers');
   const schemasPath = path.join(graphqlPath, 'schemas');
-<<<<<<< HEAD
-  
-  fs.ensureDirSync(resolversPath);
-  fs.ensureDirSync(schemasPath);
-  
-=======
   const dataLoadersPath = path.join(graphqlPath, 'dataloaders');
 
   fs.ensureDirSync(resolversPath);
   fs.ensureDirSync(schemasPath);
   fs.ensureDirSync(dataLoadersPath);
-
->>>>>>> c615a6f (feat: implement complete GraphQL scaffolding with DataLoader support)
   // Generate GraphQL module
   spinner.text = 'Creating GraphQL module...';
   const graphqlModuleContent = createGraphQLModuleTemplate();
-  fs.writeFileSync(path.join(graphqlPath, 'graphql.module.ts'), graphqlModuleContent);
-  
+  fs.writeFileSync(
+    path.join(graphqlPath, 'graphql.module.ts'),
+    graphqlModuleContent,
+  );
+
   // Generate base schema
   spinner.text = 'Creating base schema...';
   const baseSchemaContent = createBaseSchemaTemplate();
   fs.writeFileSync(path.join(schemasPath, 'base.schema.ts'), baseSchemaContent);
-  
+
   // Generate example resolver
   spinner.text = 'Creating example resolver...';
   const exampleResolverContent = createExampleResolverTemplate();
-<<<<<<< HEAD
-  fs.writeFileSync(path.join(resolversPath, 'app.resolver.ts'), exampleResolverContent);
-  
-=======
   fs.writeFileSync(
     path.join(resolversPath, 'app.resolver.ts'),
     exampleResolverContent,
@@ -107,20 +105,14 @@ async function setupGraphQL(spinner: Ora) {
     path.join(dataLoadersPath, 'dataloader.service.ts'),
     dataLoaderServiceContent,
   );
-
->>>>>>> c615a6f (feat: implement complete GraphQL scaffolding with DataLoader support)
   // Update app.module.ts
   spinner.text = 'Updating app module...';
   updateAppModuleForGraphQL();
-  
+
   spinner.succeed('GraphQL setup completed!');
-  
+
   console.log(chalk.cyan('\n📋 Next steps:'));
   console.log(chalk.gray('1. Install GraphQL dependencies:'));
-<<<<<<< HEAD
-  console.log(chalk.white('   npm install @nestjs/graphql @nestjs/apollo graphql apollo-server-express'));
-  console.log(chalk.gray('2. Start your server and visit:'));
-=======
   console.log(
     chalk.white(
       '   npm install @nestjs/graphql @nestjs/apollo graphql apollo-server-express dataloader',
@@ -131,33 +123,32 @@ async function setupGraphQL(spinner: Ora) {
   console.log(chalk.white('   nestify generate schema <name>'));
   console.log(chalk.white('   nestify generate dataloader <name>'));
   console.log(chalk.gray('3. Start your server and visit:'));
->>>>>>> c615a6f (feat: implement complete GraphQL scaffolding with DataLoader support)
   console.log(chalk.white('   http://localhost:3000/graphql'));
 }
 
 async function generateResolver(name: string, spinner: Ora) {
   const resolverPath = path.join('src', 'graphql', 'resolvers');
   const fileName = `${name}.resolver.ts`;
-  
+
   spinner.start('Creating resolver...');
   fs.ensureDirSync(resolverPath);
-  
+
   const resolverContent = createResolverTemplate(name);
   fs.writeFileSync(path.join(resolverPath, fileName), resolverContent);
-  
+
   spinner.succeed(`Resolver created: src/graphql/resolvers/${fileName}`);
 }
 
 async function generateSchema(name: string, spinner: Ora) {
   const schemaPath = path.join('src', 'graphql', 'schemas');
   const fileName = `${name}.schema.ts`;
-  
+
   spinner.start('Creating schema...');
   fs.ensureDirSync(schemaPath);
-  
+
   const schemaContent = createSchemaTemplate(name);
   fs.writeFileSync(path.join(schemaPath, fileName), schemaContent);
-  
+
   spinner.succeed(`Schema created: src/graphql/schemas/${fileName}`);
 }
 
@@ -276,13 +267,8 @@ export class AppResolver {
 
 function createResolverTemplate(name: string): string {
   const className = toPascalCase(name);
-<<<<<<< HEAD
-  
-  return `import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-=======
 
   return `import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
->>>>>>> c615a6f (feat: implement complete GraphQL scaffolding with DataLoader support)
 import { ${className} } from '../schemas/${name}.schema';
 import { ${className}DataLoader } from '../dataloaders/${name}.dataloader';
 
@@ -342,7 +328,7 @@ export class ${className}Resolver {
 
 function createSchemaTemplate(name: string): string {
   const className = toPascalCase(name);
-  
+
   return `import { ObjectType, Field, ID, InputType } from '@nestjs/graphql';
 import { BaseEntity } from './base.schema';
 
@@ -377,31 +363,21 @@ export class Update${className}Input {
 
 function updateAppModuleForGraphQL() {
   const appModulePath = path.join('src', 'app.module.ts');
-  
+
   if (fs.existsSync(appModulePath)) {
     let content = fs.readFileSync(appModulePath, 'utf8');
-    
+
     // Add GraphQL import if not exists
     if (!content.includes('GraphqlModule')) {
       content = content.replace(
         "import { AppService } from './app.service';",
-        "import { AppService } from './app.service';\nimport { GraphqlModule } from './graphql/graphql.module';"
+        "import { AppService } from './app.service';\nimport { GraphqlModule } from './graphql/graphql.module';",
       );
-      
+
       // Add to imports array
-      content = content.replace(
-        'imports: [],',
-        'imports: [GraphqlModule],'
-      );
-      
+      content = content.replace('imports: [],', 'imports: [GraphqlModule],');
+
       fs.writeFileSync(appModulePath, content);
     }
   }
-}
-
-function toPascalCase(str: string): string {
-  return str
-    .split(/[-_\s]+/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join('');
 }

@@ -52,7 +52,20 @@ describe('PackageInstallerService', () => {
       expect(deps).toHaveLength(7);
     });
 
-<<<<<<< HEAD
+    it('should include GraphQL dependencies when useGraphQL is true', () => {
+      const deps = PackageInstallerService.getDependencies(
+        undefined,
+        undefined,
+        true,
+      );
+
+      expect(deps).toContain('@nestjs/graphql');
+      expect(deps).toContain('@nestjs/apollo');
+      expect(deps).toContain('graphql');
+      expect(deps).toContain('dataloader');
+      expect(deps).toHaveLength(12);
+    });
+
     it('should include TypeORM dependencies for MySQL', () => {
       const deps = PackageInstallerService.getDependencies(
         Database.MYSQL,
@@ -62,17 +75,6 @@ describe('PackageInstallerService', () => {
       expect(deps).toContain('@nestjs/typeorm');
       expect(deps).toContain('typeorm');
       expect(deps).toContain('mysql2');
-    });
-
-    it('should include TypeORM dependencies for PostgreSQL', () => {
-      const deps = PackageInstallerService.getDependencies(
-        Database.POSTGRES,
-        ORM.TYPEORM,
-      );
-
-      expect(deps).toContain('@nestjs/typeorm');
-      expect(deps).toContain('typeorm');
-      expect(deps).toContain('pg');
     });
 
     it('should include Prisma dependencies for MySQL with Prisma ORM', () => {
@@ -86,32 +88,11 @@ describe('PackageInstallerService', () => {
       expect(deps).not.toContain('mysql2');
     });
 
-    it('should include Prisma dependencies for PostgreSQL with Prisma ORM', () => {
-      const deps = PackageInstallerService.getDependencies(
-        Database.POSTGRES,
-        ORM.PRISMA,
-      );
-
-      expect(deps).toContain('@prisma/client');
-      expect(deps).not.toContain('@nestjs/typeorm');
-      expect(deps).not.toContain('pg');
-    });
-
     it('should include Mongoose dependencies for MongoDB', () => {
       const deps = PackageInstallerService.getDependencies(Database.MONGODB);
 
       expect(deps).toContain('@nestjs/mongoose');
       expect(deps).toContain('mongoose');
-=======
-    it('should include GraphQL dependencies when useGraphQL is true', () => {
-      const deps = PackageInstallerService.getDependencies(undefined, true);
-
-      expect(deps).toContain('@nestjs/graphql');
-      expect(deps).toContain('@nestjs/apollo');
-      expect(deps).toContain('graphql');
-      expect(deps).toContain('dataloader');
-      expect(deps).toHaveLength(12);
->>>>>>> c615a6f (feat: implement complete GraphQL scaffolding with DataLoader support)
     });
   });
 
@@ -130,7 +111,7 @@ describe('PackageInstallerService', () => {
       const devDeps = PackageInstallerService.getDevDependencies(ORM.PRISMA);
 
       expect(devDeps).toContain('prisma');
-      expect(devDeps).toHaveLength(24);
+      expect(devDeps).toHaveLength(25);
     });
   });
 

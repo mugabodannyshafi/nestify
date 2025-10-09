@@ -1,9 +1,4 @@
-function toPascalCase(str: string): string {
-  return str
-    .split(/[-_\s]+/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join('');
-}
+import { toPascalCase } from '../utils/string.utils';
 
 export function createDataLoaderTemplate(name: string): string {
   const className = toPascalCase(name);
@@ -53,8 +48,6 @@ export class ${className}DataLoader {
     this.${name}sByUserLoader.clearAll();
   }
 }
-
-
 `;
 }
 

@@ -58,11 +58,8 @@ export async function newCommand(
         projectPath,
         answers.packageManager,
         answers.database,
-<<<<<<< HEAD
         answers.orm,
-=======
         answers.useGraphQL,
->>>>>>> c615a6f (feat: implement complete GraphQL scaffolding with DataLoader support)
       );
 
       await FormatterService.format(projectPath, answers.packageManager);

@@ -8,7 +8,11 @@ import { PrismaService } from './prisma.service';
 const execAsync = promisify(exec);
 
 export class PackageInstallerService {
-  static getDependencies(database?: Database, orm?: ORM, useGraphQL?: boolean): string[] {
+  static getDependencies(
+    database?: Database,
+    orm?: ORM,
+    useGraphQL?: boolean,
+  ): string[] {
     const dependencies = [
       '@nestjs/common',
       '@nestjs/core',
