@@ -18,6 +18,9 @@ describe('EnvGenerator', () => {
       author: 'Test Author',
       useDocker,
       database,
+      useSwagger: false,
+      useGraphQL: false,
+      useGitHubActions: false,
     },
   });
 
@@ -135,6 +138,9 @@ describe('EnvGenerator', () => {
           description: 'Test',
           author: 'Test Author',
           useDocker: false,
+          useSwagger: false,
+          useGraphQL: false,
+          useGitHubActions: false,
         },
       };
 

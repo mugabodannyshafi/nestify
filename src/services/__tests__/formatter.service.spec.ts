@@ -1,7 +1,6 @@
 import { FormatterService } from '../formatter.service';
-import { execa } from 'execa';
 
-jest.mock('execa');
+jest.mock('execa', () => jest.fn());
 jest.mock('ora', () => {
   return jest.fn(() => ({
     start: jest.fn().mockReturnThis(),
@@ -10,13 +9,13 @@ jest.mock('ora', () => {
   }));
 });
 
+const mockExeca = require('execa') as jest.Mock;
+
 describe('FormatterService', () => {
   const mockProjectPath = '/path/to/project';
-  let mockExeca: jest.MockedFunction<typeof execa>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockExeca = execa as jest.MockedFunction<typeof execa>;
   });
 
   describe('format', () => {

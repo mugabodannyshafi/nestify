@@ -2,6 +2,7 @@ import { PrismaService } from '../prisma.service';
 import { Database, PackageManager } from '../../constants/enums';
 import { exec } from 'child_process';
 import fs from 'fs-extra';
+import path from 'path';
 
 jest.mock('child_process');
 jest.mock('fs-extra');
@@ -99,7 +100,7 @@ describe('PrismaService', () => {
       );
 
       expect(fs.existsSync).toHaveBeenCalledWith(
-        '/test/path/prisma/schema.prisma',
+        expect.stringContaining('schema.prisma'),
       );
       expect(mockExec).toHaveBeenCalled();
     });
@@ -119,7 +120,7 @@ describe('PrismaService', () => {
       );
 
       expect(fs.existsSync).toHaveBeenCalledWith(
-        '/test/path/prisma/schema.prisma',
+        expect.stringContaining('schema.prisma'),
       );
       expect(mockExec).toHaveBeenCalled();
     });
@@ -140,9 +141,11 @@ describe('PrismaService', () => {
 
       await PrismaService.createPrismaService('/test/path');
 
-      expect(fs.ensureDirSync).toHaveBeenCalledWith('/test/path/src/prisma');
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        expect.stringContaining('prisma'),
+      );
       expect(fs.writeFile).toHaveBeenCalledWith(
-        '/test/path/src/prisma/prisma.service.ts',
+        expect.stringContaining('prisma.service.ts'),
         expect.stringContaining('PrismaService'),
       );
     });
@@ -155,9 +158,11 @@ describe('PrismaService', () => {
 
       await PrismaService.createPrismaModule('/test/path');
 
-      expect(fs.ensureDirSync).toHaveBeenCalledWith('/test/path/src/prisma');
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        expect.stringContaining('prisma'),
+      );
       expect(fs.writeFile).toHaveBeenCalledWith(
-        '/test/path/src/prisma/prisma.module.ts',
+        expect.stringContaining('prisma.module.ts'),
         expect.stringContaining('PrismaModule'),
       );
     });

@@ -47,6 +47,7 @@ export async function newCommand(
     FileGeneratorService.generateEnvironmentFiles(config);
     FileGeneratorService.generateConfigFiles(config);
     FileGeneratorService.generateDockerFiles(config);
+    FileGeneratorService.generateGraphQLFiles(config);
     FileGeneratorService.generateGitHubActionsFiles(config);
     FileGeneratorService.generateReadme(config);
 
@@ -58,6 +59,7 @@ export async function newCommand(
         answers.packageManager,
         answers.database,
         answers.orm,
+        answers.useGraphQL,
       );
 
       await FormatterService.format(projectPath, answers.packageManager);

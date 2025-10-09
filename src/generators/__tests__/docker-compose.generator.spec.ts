@@ -18,6 +18,9 @@ describe('DockerComposeGenerator', () => {
       useDocker,
       database,
       orm,
+      useSwagger: false,
+      useGraphQL: false,
+      useGitHubActions: false,
     },
   });
 

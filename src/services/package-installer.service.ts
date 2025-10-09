@@ -8,7 +8,11 @@ import { PrismaService } from './prisma.service';
 const execAsync = promisify(exec);
 
 export class PackageInstallerService {
-  static getDependencies(database?: Database, orm?: ORM): string[] {
+  static getDependencies(
+    database?: Database,
+    orm?: ORM,
+    useGraphQL?: boolean,
+  ): string[] {
     const dependencies = [
       '@nestjs/common',
       '@nestjs/core',
@@ -18,6 +22,17 @@ export class PackageInstallerService {
       'reflect-metadata',
       'rxjs',
     ];
+
+    // Add GraphQL dependencies
+    if (useGraphQL) {
+      dependencies.push(
+        '@nestjs/graphql',
+        '@nestjs/apollo',
+        'graphql',
+        'apollo-server-express',
+        'dataloader',
+      );
+    }
 
     // Add database-specific dependencies
     if (database === Database.MYSQL || database === Database.POSTGRES) {
@@ -50,6 +65,7 @@ export class PackageInstallerService {
       '@types/jest',
       '@types/node',
       '@types/supertest',
+      '@types/dataloader',
       '@typescript-eslint/eslint-plugin',
       '@typescript-eslint/parser',
       '@eslint/js',
@@ -103,11 +119,12 @@ export class PackageInstallerService {
     packageManager: PackageManager,
     database?: Database,
     orm?: ORM,
+    useGraphQL?: boolean,
   ): Promise<void> {
     const spinner = ora('Installing dependencies...').start();
 
     try {
-      const dependencies = this.getDependencies(database, orm);
+      const dependencies = this.getDependencies(database, orm, useGraphQL);
       const devDependencies = this.getDevDependencies(orm);
 
       // Install regular dependencies
