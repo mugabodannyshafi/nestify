@@ -1,5 +1,5 @@
 import ora from 'ora';
-import execa from 'execa';
+import { execa } from 'execa';
 
 export class FormatterService {
   static async format(
