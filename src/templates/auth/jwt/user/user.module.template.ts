@@ -10,7 +10,7 @@ import { UserController } from './controllers/user.controller';`;
     case ORM.TYPEORM:
       imports += `
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../../../database/entities/user.entity';`;
+import { User } from '../../database/entities/user.entity';`;
       moduleImports = `TypeOrmModule.forFeature([User])`;
       break;
 

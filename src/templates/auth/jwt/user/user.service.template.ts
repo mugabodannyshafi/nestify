@@ -12,7 +12,7 @@ export function createUserService(orm?: ORM): string {
       imports = `import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../../../database/entities/user.entity';`;
+import { User } from '../../../database/entities/user.entity';`;
       constructorParams = `@InjectRepository(User) private userRepository: Repository<User>`;
       findByEmailMethod = `return this.userRepository.findOne({ where: { email } });`;
       createMethod = `const user = this.userRepository.create(userData);

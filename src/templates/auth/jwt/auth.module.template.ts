@@ -1,7 +1,7 @@
 import { ORM } from '../../../constants/enums';
 
 export function createAuthModule(orm?: ORM): string {
-  const userModuleImport = `import { UserModule } from './user/user.module';`;
+  const userModuleImport = `import { UserModule } from '../user/user.module';`;
 
   return `import { Module } from '@nestjs/common';
 import { AuthService } from './services/auth.service';

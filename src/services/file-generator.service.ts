@@ -38,6 +38,12 @@ import chalk from 'chalk';
 import { createUserController } from '../templates/auth/jwt/user/user.controller.template';
 import { createRegisterDto } from '../templates/auth/jwt/dto/register.dto.template';
 import { createLoginDto } from '../templates/auth/jwt/dto/login.dto.template';
+import { createAuthServiceSpec } from '../templates/auth/jwt/auth.service.spec.template';
+import { createAuthControllerSpec } from '../templates/auth/jwt/auth.controller.spec.template';
+import { createUserServiceSpec } from '../templates/auth/jwt/user/user.service.spec.template';
+import { createUserControllerSpec } from '../templates/auth/jwt/user/user.controller.spec.template';
+import { createAuthE2ESpec } from '../templates/auth/jwt/auth.e2e-spec.template';
+import { createUserE2ESpec } from '../templates/auth/jwt/user/user.e2e-spec.template';
 
 export class FileGeneratorService {
   static generateBaseFiles(config: ProjectConfig): void {
@@ -134,6 +140,16 @@ export class FileGeneratorService {
     );
 
     fs.writeFileSync(
+      path.join(testPath, 'auth.e2e-spec.ts'),
+      createAuthE2ESpec(config.answers.orm),
+    );
+
+    fs.writeFileSync(
+      path.join(testPath, 'users.e2e-spec.ts'),
+      createUserE2ESpec(config.answers.orm),
+    );
+
+    fs.writeFileSync(
       path.join(testPath, 'jest-e2e.json'),
       createJestE2EConfig(),
     );
@@ -204,7 +220,7 @@ export class FileGeneratorService {
     }
 
     const authPath = path.join(projectPath, 'src/modules/auth');
-    const userPath = path.join(authPath, 'user');
+    const userPath = path.join(projectPath, 'src/modules/user');
     const controllersPath = path.join(authPath, 'controllers');
     const servicesPath = path.join(authPath, 'services');
     const dtoPath = path.join(authPath, 'dto');
@@ -212,6 +228,7 @@ export class FileGeneratorService {
 
     const userControllersPath = path.join(userPath, 'controllers');
     const userServicesPath = path.join(userPath, 'services');
+    const userDtoPath = path.join(userPath, 'dto');
     const userSchemasPath = path.join(userPath, 'schemas'); // For Mongoose
 
     const guardsPath = path.join(projectPath, 'src/common/guards');
@@ -225,6 +242,7 @@ export class FileGeneratorService {
     fs.ensureDirSync(strategiesPath);
     fs.ensureDirSync(userControllersPath);
     fs.ensureDirSync(userServicesPath);
+    fs.ensureDirSync(userDtoPath);
     fs.ensureDirSync(guardsPath);
 
     if (answers.orm !== ORM.TYPEORM && answers.orm !== ORM.PRISMA) {
@@ -243,8 +261,16 @@ export class FileGeneratorService {
         createAuthService(),
       );
       fs.writeFileSync(
+        path.join(servicesPath, 'auth.service.spec.ts'),
+        createAuthServiceSpec(),
+      );
+      fs.writeFileSync(
         path.join(controllersPath, 'auth.controller.ts'),
         createAuthController(),
+      );
+      fs.writeFileSync(
+        path.join(controllersPath, 'auth.controller.spec.ts'),
+        createAuthControllerSpec(),
       );
 
       // Generate DTOs
@@ -280,8 +306,16 @@ export class FileGeneratorService {
         createUserService(answers.orm),
       );
       fs.writeFileSync(
+        path.join(userServicesPath, 'user.service.spec.ts'),
+        createUserServiceSpec(answers.orm),
+      );
+      fs.writeFileSync(
         path.join(userControllersPath, 'user.controller.ts'),
         createUserController(),
+      );
+      fs.writeFileSync(
+        path.join(userControllersPath, 'user.controller.spec.ts'),
+        createUserControllerSpec(),
       );
       fs.writeFileSync(
         path.join(userPath, 'user.module.ts'),

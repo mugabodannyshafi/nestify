@@ -1,7 +1,7 @@
 export function createAuthService(): string {
   return `import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/services/user.service';
+import { UserService } from '../../user/services/user.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
