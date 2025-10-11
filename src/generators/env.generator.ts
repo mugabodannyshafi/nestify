@@ -36,7 +36,7 @@ DATABASE_URL=mongodb://localhost:27017/${projectName}
 
 # JWT
 JWT_SECRET=your-secret-key-here
-JWT_EXPIRATION=7d
+JWT_EXPIRES_IN=7d
 
 # API
 API_PREFIX=api
@@ -53,7 +53,7 @@ DATABASE_URL=mongodb://localhost:27017/${projectName}-test
 
 # JWT for testing
 JWT_SECRET=test-secret-key
-JWT_EXPIRATION=1d
+JWT_EXPIRES_IN=1d
 
 # API
 API_PREFIX=api

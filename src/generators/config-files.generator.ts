@@ -11,38 +11,39 @@ export class ConfigFilesGenerator {
 
   private static getGitignore(): string {
     return `# Dependencies
-/dist
-/node_modules
-/build
-
-# Environment
-.env
-.env.testing
-.env.production
-
-# IDE
-.vscode/
-.idea/
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Tests
-coverage/
-.nyc_output/
-
-# Temp files
-*.tmp
-*.swp`;
+  /dist
+  /node_modules
+  /.pnpm-store
+  /build
+  
+  # Environment
+  .env
+  .env.testing
+  .env.production
+  
+  # IDE
+  .vscode/
+  .idea/
+  
+  # Logs
+  *.log
+  npm-debug.log*
+  yarn-debug.log*
+  yarn-error.log*
+  pnpm-debug.log*
+  lerna-debug.log*
+  
+  # OS
+  .DS_Store
+  Thumbs.db
+  
+  # Tests
+  coverage/
+  .nyc_output/
+  
+  # Temp files
+  *.tmp
+  *.swp`;
   }
 
   private static getPrettierConfig(): string {
@@ -90,7 +91,7 @@ export default tseslint.config(
     },
     rules: {
       // TypeScript specific rules
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { 
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_' 
