@@ -191,6 +191,7 @@ export class PackageInstallerService {
           projectPath,
           database,
           packageManager,
+          useAuth,
         );
 
         await PrismaService.createPrismaService(projectPath);

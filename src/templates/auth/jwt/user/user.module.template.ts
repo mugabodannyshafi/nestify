@@ -13,13 +13,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../database/entities/user.entity';`;
       moduleImports = `TypeOrmModule.forFeature([User])`;
       break;
-
     case ORM.PRISMA:
-      imports += `
-import { PrismaModule } from '../../../prisma/prisma.module';`;
-      moduleImports = `PrismaModule`;
+      // No additional imports or module imports needed for Prisma
       break;
-
     default: // Mongoose
       imports += `
 import { MongooseModule } from '@nestjs/mongoose';

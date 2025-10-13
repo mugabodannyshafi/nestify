@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { ProjectConfig } from '../types/project.types';
 import { PackageInstallerService } from '../services/package-installer.service';
+import { ORM } from '../constants/enums';
 
 export class ConsoleMessages {
   static showSuccess(
@@ -28,17 +29,34 @@ export class ConsoleMessages {
       stepNumber++;
     }
 
+    // Prisma setup steps if useAuth is true and ORM is Prisma
+    if (config.answers.useAuth && config.answers.orm === ORM.PRISMA) {
+      console.log(chalk.magenta(`\n🔧 Prisma Database Setup:`));
+      console.log(chalk.white(`  ${stepNumber}. npx prisma generate`));
+      stepNumber++;
+      console.log(
+        chalk.white(`  ${stepNumber}. npx prisma migrate dev --name init`),
+      );
+      console.log(chalk.gray(`     (This will create your database tables)`));
+      stepNumber++;
+      console.log(
+        chalk.yellow(
+          `\n⚠️  Make sure to configure DATABASE_URL in your .env file first!`,
+        ),
+      );
+      console.log(
+        chalk.gray(
+          `     Example: DATABASE_URL=postgresql://postgres:password@localhost:5432/testing?schema=public\n`,
+        ),
+      );
+    }
+
     // Start command
     this.showStartCommand(config, stepNumber);
 
     // Additional features info
-
     console.log(chalk.cyan('\n📚 Swagger documentation will be available at:'));
     console.log(chalk.white('   http://localhost:3000/api'));
-    console.log(chalk.cyan('\n🚀 GitHub Actions workflows added:'));
-    console.log(
-      chalk.white('   - .github/workflows/tests.yml (automated testing)'),
-    );
 
     console.log(chalk.cyan('\n🎉 Happy coding!'));
     console.log(chalk.yellow('\n☕ Enjoying nestify? Buy me a coffee:'));

@@ -22,7 +22,7 @@ import { User } from '../../../database/entities/user.entity';`;
 
     case ORM.PRISMA:
       imports = `import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../../prisma/prisma.service';`;
+import { PrismaService } from '../../../prisma/prisma.service';`;
       constructorParams = `private prisma: PrismaService`;
       findByEmailMethod = `return this.prisma.user.findUnique({ where: { email } });`;
       createMethod = `return this.prisma.user.create({ data: userData });`;

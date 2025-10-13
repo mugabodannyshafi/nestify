@@ -25,7 +25,7 @@ import { User } from '../../../database/entities/user.entity';`;
     case ORM.PRISMA:
       imports = `import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { PrismaService } from '../../../../prisma/prisma.service';`;
+import { PrismaService } from '../../../prisma/prisma.service';`;
       mockProvider = 'PrismaService';
       mockRepository = `const mockPrismaService = {
     user: {
