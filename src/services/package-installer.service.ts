@@ -8,7 +8,12 @@ import { PrismaService } from './prisma.service';
 const execAsync = promisify(exec);
 
 export class PackageInstallerService {
-  static getDependencies(database?: Database, orm?: ORM): string[] {
+  static getDependencies(
+    database?: Database,
+    orm?: ORM,
+    useAuth?: boolean,
+    authStrategies?: string[],
+  ): string[] {
     const dependencies = [
       '@nestjs/common',
       '@nestjs/core',
@@ -17,15 +22,15 @@ export class PackageInstallerService {
       '@nestjs/swagger',
       'reflect-metadata',
       'rxjs',
+      'class-validator',
+      'class-transformer',
     ];
 
     // Add database-specific dependencies
     if (database === Database.MYSQL || database === Database.POSTGRES) {
       if (orm === ORM.PRISMA) {
-        // Prisma dependencies
         dependencies.push('@prisma/client');
       } else {
-        // TypeORM dependencies (default)
         dependencies.push('@nestjs/typeorm', 'typeorm');
 
         if (database === Database.MYSQL) {
@@ -38,10 +43,26 @@ export class PackageInstallerService {
       dependencies.push('@nestjs/mongoose', 'mongoose');
     }
 
+    // Add authentication dependencies
+    if (useAuth && authStrategies?.includes('jwt')) {
+      dependencies.push(
+        '@nestjs/jwt',
+        '@nestjs/passport',
+        'passport',
+        'passport-jwt',
+        'passport-local',
+        'bcrypt',
+      );
+    }
+
     return dependencies;
   }
 
-  static getDevDependencies(orm?: ORM): string[] {
+  static getDevDependencies(
+    orm?: ORM,
+    useAuth?: boolean,
+    authStrategies?: string[],
+  ): string[] {
     const devDeps = [
       '@nestjs/cli',
       '@nestjs/schematics',
@@ -68,9 +89,17 @@ export class PackageInstallerService {
       'typescript-eslint',
     ];
 
-    // Add Prisma as dev dependency if using Prisma
     if (orm === ORM.PRISMA) {
       devDeps.push('prisma');
+    }
+
+    // Add authentication dev dependencies
+    if (useAuth && authStrategies?.includes('jwt')) {
+      devDeps.push(
+        '@types/passport-jwt',
+        '@types/passport-local',
+        '@types/bcrypt',
+      );
     }
 
     return devDeps;
@@ -81,7 +110,6 @@ export class PackageInstallerService {
     packages?: string[],
     isDev: boolean = false,
   ): string {
-    // If no packages provided, return base install command
     if (!packages || packages.length === 0) {
       return this.getBaseInstallCommand(packageManager);
     }
@@ -103,14 +131,26 @@ export class PackageInstallerService {
     packageManager: PackageManager,
     database?: Database,
     orm?: ORM,
+    useAuth?: boolean,
+    authStrategies?: string[],
   ): Promise<void> {
     const spinner = ora('Installing dependencies...').start();
 
     try {
-      const dependencies = this.getDependencies(database, orm);
-      const devDependencies = this.getDevDependencies(orm);
+      const dependencies = this.getDependencies(
+        database,
+        orm,
+        useAuth,
+        authStrategies,
+      );
+      const devDependencies = this.getDevDependencies(
+        orm,
+        useAuth,
+        authStrategies,
+      );
 
       // Install regular dependencies
+      spinner.text = 'Installing dependencies...';
       const depsCommand = this.getInstallCommand(
         packageManager,
         dependencies,
@@ -127,6 +167,7 @@ export class PackageInstallerService {
       }
 
       // Install dev dependencies
+      spinner.text = 'Installing dev dependencies...';
       const devDepsCommand = this.getInstallCommand(
         packageManager,
         devDependencies,
@@ -142,18 +183,17 @@ export class PackageInstallerService {
         throw new Error(devStderr);
       }
 
-      // If using Prisma, initialize it using Prisma CLI
+      // If using Prisma, initialize it
       if (orm === ORM.PRISMA && database) {
         spinner.text = 'Initializing Prisma...';
 
-        // Initialize Prisma using CLI (this creates schema.prisma with proper config)
         await PrismaService.initializePrisma(
           projectPath,
           database,
           packageManager,
+          useAuth,
         );
 
-        // Create Prisma service and module files
         await PrismaService.createPrismaService(projectPath);
         await PrismaService.createPrismaModule(projectPath);
       }

@@ -19,7 +19,8 @@ export function createPackageJson(
     'test:cov': 'jest --coverage',
     'test:debug':
       'node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand',
-    'test:e2e': 'jest --config ./test/jest-e2e.json',
+    'test:e2e':
+      'jest --config ./test/jest-e2e.json --detectOpenHandles --runInBand',
   };
 
   // Add Prisma scripts if using Prisma
