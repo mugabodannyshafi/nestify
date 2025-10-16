@@ -40,7 +40,7 @@ ${useDocker ? 'FORWARD_REDIS_PORT=6380' : ''}
 
 # JWT
 JWT_SECRET=your-secret-key-here-change-in-production
-JWT_EXPIRATION=7d
+JWT_EXPIRES_IN=7d
 
 # API
 API_PREFIX=api
@@ -64,7 +64,7 @@ REDIS_PORT=${useDocker ? '6379' : '6380'}
 
 # JWT for testing
 JWT_SECRET=test-secret-key
-JWT_EXPIRATION=1d
+JWT_EXPIRES_IN=1d
 
 # API
 API_PREFIX=api
@@ -93,7 +93,7 @@ ${useDocker ? 'FORWARD_REDIS_PORT=6380' : ''}
 
 # JWT
 JWT_SECRET=your-secret-key-here-change-in-production
-JWT_EXPIRATION=7d
+JWT_EXPIRES_IN=7d
 
 # API
 API_PREFIX=api
@@ -117,7 +117,7 @@ REDIS_PORT=${useDocker ? '6379' : '6380'}
 
 # JWT for testing
 JWT_SECRET=test-secret-key
-JWT_EXPIRATION=1d
+JWT_EXPIRES_IN=1d
 
 # API
 API_PREFIX=api
@@ -146,7 +146,7 @@ ${useDocker ? 'FORWARD_REDIS_PORT=6380' : ''}
 
 # JWT
 JWT_SECRET=your-secret-key-here-change-in-production
-JWT_EXPIRATION=7d
+JWT_EXPIRES_IN=7d
 
 # API
 API_PREFIX=api
@@ -170,7 +170,7 @@ REDIS_PORT=${useDocker ? '6379' : '6380'}
 
 # JWT for testing
 JWT_SECRET=test-secret-key
-JWT_EXPIRATION=1d
+JWT_EXPIRES_IN=1d
 
 # API
 API_PREFIX=api

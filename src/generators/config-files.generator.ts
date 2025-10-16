@@ -42,7 +42,8 @@ coverage/
 
 # Temp files
 *.tmp
-*.swp`;
+*.swp
+.pnpm-store`;
   }
 
   private static getPrettierConfig(): string {
@@ -90,7 +91,7 @@ export default tseslint.config(
     },
     rules: {
       // TypeScript specific rules
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { 
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_' 

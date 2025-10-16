@@ -91,7 +91,7 @@ describe('EnvGenerator', () => {
       expect(env).toContain('PORT=3000');
       expect(env).toContain('DATABASE_URL=mongodb://localhost:27017/test-app');
       expect(env).toContain('JWT_SECRET=your-secret-key-here');
-      expect(env).toContain('JWT_EXPIRATION=7d');
+      expect(env).toContain('JWT_EXPIRES_IN=7d');
       expect(env).toContain('API_PREFIX=api');
       expect(env).toContain('API_VERSION=1');
     });
@@ -107,7 +107,7 @@ describe('EnvGenerator', () => {
         'DATABASE_URL=mongodb://localhost:27017/test-app-test',
       );
       expect(testEnv).toContain('JWT_SECRET=test-secret-key');
-      expect(testEnv).toContain('JWT_EXPIRATION=1d');
+      expect(testEnv).toContain('JWT_EXPIRES_IN=1d');
       expect(testEnv).toContain('API_PREFIX=api');
       expect(testEnv).toContain('API_VERSION=1');
     });

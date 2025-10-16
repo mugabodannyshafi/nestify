@@ -168,6 +168,8 @@ describe('newCommand', () => {
         PackageManager.NPM,
         Database.POSTGRES,
         undefined, // orm parameter
+        undefined, // useAuth parameter
+        undefined, // authStrategies parameter
       );
     });
 

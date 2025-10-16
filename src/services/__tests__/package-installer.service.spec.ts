@@ -49,7 +49,7 @@ describe('PackageInstallerService', () => {
       expect(deps).toContain('@nestjs/swagger');
       expect(deps).toContain('@nestjs/common');
       expect(deps).toContain('@nestjs/core');
-      expect(deps).toHaveLength(7);
+      expect(deps).toHaveLength(9);
     });
 
     it('should include TypeORM dependencies for MySQL', () => {
