@@ -45,7 +45,11 @@ export class GenerateService {
 
   static buildFileList(config: GenerateConfig): GeneratedFile[] {
     const { schematic, name, options } = config;
-    const targetDir = this.resolveTargetDirectory(name, schematic, options.flat);
+    const targetDir = this.resolveTargetDirectory(
+      name,
+      schematic,
+      options.flat,
+    );
     const files: GeneratedFile[] = [];
 
     const templateFn = this.getTemplateFn(schematic);
@@ -125,9 +129,7 @@ export class GenerateService {
     }
   }
 
-  static getTemplateFn(
-    schematic: Schematic,
-  ): (name: string) => string {
+  static getTemplateFn(schematic: Schematic): (name: string) => string {
     switch (schematic) {
       case Schematic.MODULE:
         return createModuleTemplate;
@@ -144,9 +146,7 @@ export class GenerateService {
     }
   }
 
-  static getSpecTemplateFn(
-    schematic: Schematic,
-  ): (name: string) => string {
+  static getSpecTemplateFn(schematic: Schematic): (name: string) => string {
     switch (schematic) {
       case Schematic.MODULE:
         return createModuleSpecTemplate;
@@ -178,10 +178,7 @@ export class GenerateService {
 
     // Build the import statement
     const componentClass = `${className}${suffixPascal}`;
-    const relativePath = this.getRelativeImportPath(
-      modulePath,
-      config,
-    );
+    const relativePath = this.getRelativeImportPath(modulePath, config);
 
     const importStatement = `import { ${componentClass} } from '${relativePath}';`;
 
@@ -211,7 +208,11 @@ export class GenerateService {
     const baseName = this.getBaseName(config.name);
 
     // First check for a module in the same directory as the component
-    const componentModulePath = path.join(srcPath, baseName, `${baseName}.module.ts`);
+    const componentModulePath = path.join(
+      srcPath,
+      baseName,
+      `${baseName}.module.ts`,
+    );
     if (fs.existsSync(componentModulePath)) {
       return componentModulePath;
     }
@@ -232,7 +233,11 @@ export class GenerateService {
     const { schematic, name, options } = config;
     const baseName = this.getBaseName(name);
     const suffix = this.getSuffix(schematic);
-    const targetDir = this.resolveTargetDirectory(name, schematic, options.flat);
+    const targetDir = this.resolveTargetDirectory(
+      name,
+      schematic,
+      options.flat,
+    );
     const filePath = path.join(targetDir, `${baseName}.${suffix}`);
 
     let relativePath = path.relative(path.dirname(modulePath), filePath);

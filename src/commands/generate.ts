@@ -43,9 +43,7 @@ export async function generateCommand(
       }
     } else {
       console.log(
-        chalk.green(
-          `\n✅ Generated ${resolvedSchematic}: ${name}\n`,
-        ),
+        chalk.green(`\n✅ Generated ${resolvedSchematic}: ${name}\n`),
       );
       for (const file of files) {
         console.log(chalk.white(`  CREATE ${file.filePath}`));

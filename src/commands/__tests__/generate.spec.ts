@@ -109,7 +109,10 @@ describe('generateCommand', () => {
 
   it('should resolve "i" alias to interceptor schematic', async () => {
     (GenerateService.generate as jest.Mock).mockReturnValue([
-      { filePath: '/src/common/interceptors/logging.interceptor.ts', content: '' },
+      {
+        filePath: '/src/common/interceptors/logging.interceptor.ts',
+        content: '',
+      },
     ]);
 
     await generateCommand('i', 'logging', {

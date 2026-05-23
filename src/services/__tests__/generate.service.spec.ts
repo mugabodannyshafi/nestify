@@ -210,9 +210,7 @@ describe('GenerateService', () => {
         false,
       );
 
-      expect(result).toBe(
-        path.join(mockCwd, 'src', 'common', 'interceptors'),
-      );
+      expect(result).toBe(path.join(mockCwd, 'src', 'common', 'interceptors'));
     });
 
     it('should place pipes in common/pipes', () => {
@@ -239,10 +237,14 @@ describe('GenerateService', () => {
   describe('getSuffix', () => {
     it('should return correct suffix for each schematic', () => {
       expect(GenerateService.getSuffix(Schematic.MODULE)).toBe('module');
-      expect(GenerateService.getSuffix(Schematic.CONTROLLER)).toBe('controller');
+      expect(GenerateService.getSuffix(Schematic.CONTROLLER)).toBe(
+        'controller',
+      );
       expect(GenerateService.getSuffix(Schematic.SERVICE)).toBe('service');
       expect(GenerateService.getSuffix(Schematic.GUARD)).toBe('guard');
-      expect(GenerateService.getSuffix(Schematic.INTERCEPTOR)).toBe('interceptor');
+      expect(GenerateService.getSuffix(Schematic.INTERCEPTOR)).toBe(
+        'interceptor',
+      );
       expect(GenerateService.getSuffix(Schematic.PIPE)).toBe('pipe');
     });
   });

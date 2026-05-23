@@ -39,7 +39,11 @@ program
   )
   .option('--skip-spec', 'Do not generate .spec.ts files', false)
   .option('--flat', 'Do not create a subdirectory for the component', false)
-  .option('--dry-run', 'Preview files that would be created without writing', false)
+  .option(
+    '--dry-run',
+    'Preview files that would be created without writing',
+    false,
+  )
   .action(generateCommand);
 
 program.parse(process.argv);
