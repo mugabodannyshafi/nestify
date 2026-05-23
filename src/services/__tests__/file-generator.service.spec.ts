@@ -94,11 +94,18 @@ describe('FileGeneratorService', () => {
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         '/test/path/tsconfig.build.json',
-        expect.stringContaining('"extends": "./tsconfig.json"'),
-      );
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/tsconfig.build.json',
-        expect.stringContaining('"exclude"'),
+        JSON.stringify(
+          {
+            extends: './tsconfig.json',
+            compilerOptions: {
+              rootDir: './src',
+              ignoreDeprecations: '6.0',
+            },
+            exclude: ['node_modules', 'test', 'dist', '**/*spec.ts'],
+          },
+          null,
+          2,
+        ),
       );
     });
   });

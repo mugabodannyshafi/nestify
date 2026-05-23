@@ -11,6 +11,7 @@ import ora from 'ora';
 describe('GitService', () => {
   let mockSpinner: any;
   let mockChdir: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -25,10 +26,12 @@ describe('GitService', () => {
     (ora as jest.Mock).mockReturnValue(mockSpinner);
 
     mockChdir = jest.spyOn(process, 'chdir').mockImplementation();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     mockChdir.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   describe('initialize', () => {
@@ -96,9 +99,10 @@ describe('GitService', () => {
 
       GitService.initialize(projectPath);
 
-      expect(mockSpinner.warn).toHaveBeenCalledWith(
-        'Git initialization skipped (Git may not be installed)',
+      expect(mockSpinner.fail).toHaveBeenCalledWith(
+        'Git initialization failed',
       );
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should show warning when git add fails', () => {
@@ -110,9 +114,10 @@ describe('GitService', () => {
 
       GitService.initialize(projectPath);
 
-      expect(mockSpinner.warn).toHaveBeenCalledWith(
-        'Git initialization skipped (Git may not be installed)',
+      expect(mockSpinner.fail).toHaveBeenCalledWith(
+        'Git initialization failed',
       );
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should not throw error when git commands fail', () => {
@@ -131,8 +136,9 @@ describe('GitService', () => {
 
       GitService.initialize(projectPath);
 
-      expect(mockSpinner.warn).toHaveBeenCalled();
+      expect(mockSpinner.fail).toHaveBeenCalled();
       expect(mockSpinner.succeed).not.toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should suppress stdio output from git commands', () => {
