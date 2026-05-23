@@ -59,20 +59,21 @@ CMD ["${packageManager}", "run", "start:dev"]`;
 
   private static getDockerignore(): string {
     return `node_modules
-npm-debug.log
-dist
-.git
-.gitignore
-README.md
-.env
-.env.testing
-.env.production
-coverage
-.nyc_output
-.github
-.vscode
-.idea
-*.log`;
+  .pnpm-store
+  npm-debug.log
+  dist
+  .git
+  .gitignore
+  README.md
+  .env
+  .env.testing
+  .env.production
+  coverage
+  .nyc_output
+  .github
+  .vscode
+  .idea
+  *.log`;
   }
 
   private static getDockerCompose(
@@ -99,6 +100,27 @@ coverage
           : 'pnpm prisma generate';
 
     const startCmd = `${packageManager} run start:dev`;
+    const commandParts = ['rm -rf node_modules dist'];
+
+    if (packageManager === PackageManager.PNPM) {
+      commandParts.push(
+        'corepack enable && corepack prepare pnpm@latest --activate',
+      );
+    } else if (packageManager === PackageManager.YARN) {
+      commandParts.push(
+        'corepack enable && corepack prepare yarn@stable --activate',
+      );
+    }
+
+    commandParts.push(installCmd);
+
+    if (orm === ORM.PRISMA) {
+      commandParts.push(prismaCmd);
+    }
+
+    commandParts.push(startCmd);
+
+    const fullCommand = commandParts.join(' && ');
 
     const baseService = `services:
   app:
@@ -109,7 +131,10 @@ coverage
     platform: linux/amd64
     volumes:
       - '.:/home/app'
-    command: bash -c "rm -rf node_modules dist && ${installCmd} && ${orm === ORM.PRISMA ? prismaCmd : ''} && ${startCmd}"
+    command:
+      - bash
+      - -c
+      - ${fullCommand}
     depends_on:
       db:
         condition: service_healthy
@@ -271,7 +296,7 @@ volumes:`;
     networks:
       - app-net
     healthcheck:
-      test: ['CMD-SHELL', "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/${envVar('DB_NAME')} --quiet"]
+      test: ['CMD-SHELL', "echo 'db.runCommand("ping").ok' | mongosh localhost:27017/${envVar('DB_NAME')} --quiet"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -287,7 +312,7 @@ volumes:`;
     networks:
       - app-net
     healthcheck:
-      test: ['CMD-SHELL', "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/${envVar('DB_NAME')}_test --quiet"]
+      test: ['CMD-SHELL', "echo 'db.runCommand("ping").ok' | mongosh localhost:27017/${envVar('DB_NAME')}_test --quiet"]
       interval: 5s
       timeout: 5s
       retries: 10

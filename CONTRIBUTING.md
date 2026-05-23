@@ -18,9 +18,11 @@ When working on nestify, you should:
 2. Clone your forked repository
 3. Make sure you have Node.js installed (version requirements TBD)
 4. Install dependencies and link globally:
+
 ```bash
 git clone <your_forked_repo>
 cd nestify
 npm install
 npm link
 npm test
+```

@@ -28,6 +28,7 @@ program
   .description('Create a new NestJS project')
   .option('-p, --package-manager <manager>', 'Package manager to use', 'npm')
   .option('--skip-install', 'Skip package installation')
+  .option('--no-git', 'Skip Git initialization')
   .action(newCommand);
 
 // Add the 'generate' command (g for short)
