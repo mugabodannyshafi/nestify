@@ -7,11 +7,14 @@ export interface ProjectAnswers {
   useDocker: boolean;
   database?: Database;
   orm?: ORM;
+  useAuth?: boolean;
+  authStrategies?: string[];
 }
 
 export interface NewCommandOptions {
   packageManager: string;
   skipInstall: boolean;
+  noGit?: boolean;
 }
 
 export interface ProjectConfig {
