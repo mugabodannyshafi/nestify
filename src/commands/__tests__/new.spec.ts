@@ -79,6 +79,63 @@ describe('newCommand', () => {
     consoleErrorSpy.mockRestore();
   });
 
+  describe('input validation', () => {
+    it('should reject invalid project names', async () => {
+      const invalidNames = ['my-app!', 'MyApp', 'package', ''];
+
+      for (const name of invalidNames) {
+        mockExit.mockClear();
+        await expect(newCommand(name, mockOptions)).rejects.toThrow(
+          'process.exit: 1',
+        );
+        expect(mockExit).toHaveBeenCalledWith(1);
+      }
+    });
+
+    it('should reject invalid package managers', async () => {
+      const invalidOptions: NewCommandOptions = {
+        ...mockOptions,
+        packageManager: 'invalid-pm',
+      };
+
+      await expect(newCommand(mockProjectName, invalidOptions)).rejects.toThrow(
+        'process.exit: 1',
+      );
+
+      expect(mockExit).toHaveBeenCalledWith(1);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it('should accept valid project names', async () => {
+      const validNames = ['my-app', 'myapp', 'my_app', 'app123'];
+
+      for (const name of validNames) {
+        jest.clearAllMocks();
+        (fs.existsSync as jest.Mock).mockReturnValue(false);
+        (PromptsService.getProjectDetails as jest.Mock).mockResolvedValue(
+          mockAnswers,
+        );
+        consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+        await newCommand(name, mockOptions);
+
+        expect(PromptsService.getProjectDetails).toHaveBeenCalled();
+
+        consoleLogSpy.mockRestore();
+      }
+    });
+
+    it('should show validation error messages with suggestions', async () => {
+      await expect(newCommand('package', mockOptions)).rejects.toThrow(
+        'process.exit: 1',
+      );
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Validation failed'),
+      );
+    });
+  });
+
   describe('successful project creation', () => {
     it('should create a new project successfully', async () => {
       await newCommand(mockProjectName, mockOptions);
@@ -214,6 +271,27 @@ describe('newCommand', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining(`Creating project: ${mockProjectName}`),
       );
+    });
+  });
+
+  describe('dry-run mode', () => {
+    it('should not create project files when --dry-run flag is set', async () => {
+      const dryRunOptions: NewCommandOptions = {
+        ...mockOptions,
+        dryRun: true,
+      };
+
+      try {
+        await newCommand(mockProjectName, dryRunOptions);
+      } catch (error) {
+        // Expected error from process.exit
+      }
+
+      // Verify no file creation occurred
+      expect(fs.ensureDirSync).not.toHaveBeenCalled();
+      expect(FileGeneratorService.generateBaseFiles).not.toHaveBeenCalled();
+      expect(FileGeneratorService.generateSourceFiles).not.toHaveBeenCalled();
+      expect(PackageInstallerService.install).not.toHaveBeenCalled();
     });
   });
 

@@ -8,6 +8,7 @@ import { FileGeneratorService } from '../services/file-generator.service';
 import { GitService } from '../services/git.service';
 import { PackageInstallerService } from '../services/package-installer.service';
 import { FormatterService } from '../services/formatter.service';
+import { ValidationService } from '../services/validation.service';
 import { createProjectStructure } from '../utils/project-structure';
 import { ConsoleMessages } from '../utils/console-messages';
 
@@ -18,6 +19,22 @@ export async function newCommand(
   const spinner = ora();
 
   try {
+    // Validate project name
+    const nameErrors = ValidationService.validateProjectName(projectName);
+    if (nameErrors.length > 0) {
+      console.error(chalk.red(ValidationService.formatErrors(nameErrors)));
+      process.exit(1);
+    }
+
+    // Validate package manager
+    const pmErrors = ValidationService.validatePackageManager(
+      options.packageManager,
+    );
+    if (pmErrors.length > 0) {
+      console.error(chalk.red(ValidationService.formatErrors(pmErrors)));
+      process.exit(1);
+    }
+
     const projectPath = path.resolve(process.cwd(), projectName);
     if (fs.existsSync(projectPath)) {
       console.log(chalk.red(`❌ Directory ${projectName} already exists!`));
@@ -61,6 +78,12 @@ export async function newCommand(
       path: projectPath,
       answers,
     };
+
+    // If --dry-run flag is set, show preview and exit
+    if (options.dryRun) {
+      showDryRunPreview(config, options.skipInstall);
+      process.exit(0);
+    }
 
     console.log(chalk.green(`\n📁 Creating project: ${projectName}\n`));
 
@@ -146,4 +169,107 @@ export async function newCommand(
     console.error(chalk.red('Error:'), error);
     process.exit(1);
   }
+}
+
+/**
+ * Display a dry-run preview of the project that would be created
+ */
+function showDryRunPreview(config: ProjectConfig, skipInstall: boolean): void {
+  console.log(
+    chalk.cyan.bold('\n✨ DRY-RUN MODE (No files will be created)\n'),
+  );
+  console.log(chalk.cyan('📋 Project Configuration:\n'));
+
+  console.log(chalk.white(`  Project Name:       ${chalk.green(config.name)}`));
+  console.log(chalk.white(`  Project Path:       ${chalk.green(config.path)}`));
+  console.log(
+    chalk.white(
+      `  Package Manager:    ${chalk.green(config.answers.packageManager)}`,
+    ),
+  );
+  console.log(
+    chalk.white(
+      `  Description:        ${chalk.green(config.answers.description)}`,
+    ),
+  );
+  console.log(
+    chalk.white(`  Author:             ${chalk.green(config.answers.author)}`),
+  );
+  console.log(
+    chalk.white(
+      `  Docker Support:     ${chalk.green(config.answers.useDocker ? 'Yes' : 'No')}`,
+    ),
+  );
+
+  if (config.answers.database) {
+    console.log(
+      chalk.white(
+        `  Database:           ${chalk.green(config.answers.database)}`,
+      ),
+    );
+  }
+
+  if (config.answers.orm) {
+    console.log(
+      chalk.white(`  ORM:                ${chalk.green(config.answers.orm)}`),
+    );
+  }
+
+  console.log(
+    chalk.white(
+      `  Authentication:     ${chalk.green(config.answers.useAuth ? 'Yes' : 'No')}`,
+    ),
+  );
+
+  if (
+    config.answers.authStrategies &&
+    config.answers.authStrategies.length > 0
+  ) {
+    console.log(
+      chalk.white(
+        `  Auth Strategies:    ${chalk.green(config.answers.authStrategies.join(', '))}`,
+      ),
+    );
+  }
+
+  console.log(chalk.cyan('\n📦 Files that would be generated:\n'));
+  console.log(chalk.gray('  ├── src/'));
+  console.log(chalk.gray('  │   ├── main.ts'));
+  console.log(chalk.gray('  │   ├── app.module.ts'));
+  console.log(chalk.gray('  │   ├── app.controller.ts'));
+  console.log(chalk.gray('  │   ├── app.service.ts'));
+  console.log(chalk.gray('  │   ├── app.controller.spec.ts'));
+  console.log(chalk.gray('  │   ├── app.service.spec.ts'));
+  console.log(chalk.gray('  │   └── (database files)'));
+  console.log(chalk.gray('  ├── test/'));
+  console.log(chalk.gray('  │   └── app.e2e-spec.ts'));
+  console.log(chalk.gray('  ├── .env'));
+  console.log(chalk.gray('  ├── .env.example'));
+  console.log(chalk.gray('  ├── tsconfig.json'));
+  console.log(chalk.gray('  ├── jest.config.ts'));
+  console.log(chalk.gray('  ├── package.json'));
+  console.log(chalk.gray('  ├── docker-compose.yml'));
+  console.log(chalk.gray('  ├── .github/workflows/'));
+  console.log(chalk.gray('  ├── .gitignore'));
+  console.log(chalk.gray('  ├── .prettierrc'));
+  console.log(chalk.gray('  ├── .eslintrc.js'));
+  console.log(chalk.gray('  └── README.md'));
+
+  console.log(chalk.cyan('\n🔧 Next Steps:\n'));
+  console.log(chalk.white('  1. Create project:'));
+  console.log(chalk.gray(`     nestify new ${config.name}`));
+  console.log(chalk.white('\n  2. Navigate to project:'));
+  console.log(chalk.gray(`     cd ${config.name}`));
+  console.log(chalk.white('\n  3. Start development:'));
+  console.log(chalk.gray(`     npm run start:dev`));
+
+  console.log(
+    chalk.yellow(
+      `\n⚠️  Dependencies will ${skipInstall ? 'NOT ' : ''}be installed`,
+    ),
+  );
+
+  console.log(
+    chalk.green('\n✅ Ready to create! Remove --dry-run flag to proceed.\n'),
+  );
 }
