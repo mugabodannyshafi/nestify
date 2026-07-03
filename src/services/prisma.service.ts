@@ -13,6 +13,7 @@ export class PrismaService {
     projectPath: string,
     database: Database,
     packageManager: PackageManager,
+    useAuth?: boolean,
   ): Promise<void> {
     const spinner = ora('Initializing Prisma...').start();
 
@@ -42,7 +43,7 @@ export class PrismaService {
         );
       }
 
-      await this.enhancePrismaSchema(projectPath, database);
+      await this.enhancePrismaSchema(projectPath, database, useAuth);
 
       spinner.succeed('Prisma initialized successfully!');
     } catch (error: any) {
@@ -97,7 +98,7 @@ export class PrismaService {
       );
       await execAsync(migrateCommand, {
         cwd: projectPath,
-        timeout: 120000, // Increased timeout to 2 minutes
+        timeout: 120000,
         killSignal: 'SIGKILL',
       });
 
@@ -170,6 +171,7 @@ export class PrismaService {
   private static async enhancePrismaSchema(
     projectPath: string,
     database: Database,
+    useAuth?: boolean,
   ): Promise<void> {
     const schemaPath = path.join(projectPath, 'prisma', 'schema.prisma');
 
@@ -188,12 +190,40 @@ export class PrismaService {
 }`,
     );
 
-    const exampleModel = this.getExampleModel(database);
+    const modelContent = useAuth
+      ? this.getAuthModel(database)
+      : this.getExampleModel(database);
 
-    // Append the example model to the schema
-    schemaContent += `\n${exampleModel}`;
+    schemaContent += `\n${modelContent}`;
 
     await fs.writeFile(schemaPath, schemaContent);
+  }
+
+  private static getAuthModel(database: Database): string {
+    if (database === Database.MONGODB) {
+      return `// Authentication User model
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+`;
+    }
+
+    // For MySQL and PostgreSQL
+    return `// Authentication User model
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+`;
   }
 
   private static getExampleModel(database: Database): string {

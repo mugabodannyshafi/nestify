@@ -41,9 +41,7 @@ describe('newCommand', () => {
     author: 'Test Author',
     useDocker: true,
     database: Database.POSTGRES,
-    useSwagger: true,
     useGraphQL: false,
-    useGitHubActions: true,
   };
 
   const mockProjectPath = path.resolve(process.cwd(), mockProjectName);
@@ -64,6 +62,11 @@ describe('newCommand', () => {
     );
     (PackageInstallerService.install as jest.Mock).mockResolvedValue(undefined);
 
+    // Ensure git checks are noop by default in tests
+    (GitService.ensureGitInstalled as jest.Mock).mockImplementation(
+      () => undefined,
+    );
+
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     mockExit = jest.spyOn(process, 'exit').mockImplementation((code?: any) => {
@@ -75,6 +78,63 @@ describe('newCommand', () => {
     mockExit.mockRestore();
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
+  });
+
+  describe('input validation', () => {
+    it('should reject invalid project names', async () => {
+      const invalidNames = ['my-app!', 'MyApp', 'package', ''];
+
+      for (const name of invalidNames) {
+        mockExit.mockClear();
+        await expect(newCommand(name, mockOptions)).rejects.toThrow(
+          'process.exit: 1',
+        );
+        expect(mockExit).toHaveBeenCalledWith(1);
+      }
+    });
+
+    it('should reject invalid package managers', async () => {
+      const invalidOptions: NewCommandOptions = {
+        ...mockOptions,
+        packageManager: 'invalid-pm',
+      };
+
+      await expect(newCommand(mockProjectName, invalidOptions)).rejects.toThrow(
+        'process.exit: 1',
+      );
+
+      expect(mockExit).toHaveBeenCalledWith(1);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it('should accept valid project names', async () => {
+      const validNames = ['my-app', 'myapp', 'my_app', 'app123'];
+
+      for (const name of validNames) {
+        jest.clearAllMocks();
+        (fs.existsSync as jest.Mock).mockReturnValue(false);
+        (PromptsService.getProjectDetails as jest.Mock).mockResolvedValue(
+          mockAnswers,
+        );
+        consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+        await newCommand(name, mockOptions);
+
+        expect(PromptsService.getProjectDetails).toHaveBeenCalled();
+
+        consoleLogSpy.mockRestore();
+      }
+    });
+
+    it('should show validation error messages with suggestions', async () => {
+      await expect(newCommand('package', mockOptions)).rejects.toThrow(
+        'process.exit: 1',
+      );
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Validation failed'),
+      );
+    });
   });
 
   describe('successful project creation', () => {
@@ -163,6 +223,16 @@ describe('newCommand', () => {
       expect(GitService.initialize).toHaveBeenCalledWith(mockProjectPath);
     });
 
+    it('should skip git initialization when --no-git is true', async () => {
+      const opts = {
+        ...mockOptions,
+        noGit: true,
+      } as unknown as NewCommandOptions;
+      await newCommand(mockProjectName, opts);
+
+      expect(GitService.initialize).not.toHaveBeenCalled();
+    });
+
     it('should install dependencies when skipInstall is false', async () => {
       await newCommand(mockProjectName, mockOptions);
 
@@ -172,6 +242,8 @@ describe('newCommand', () => {
         Database.POSTGRES,
         undefined, // orm parameter
         false, // useGraphQL parameter
+        undefined, // useAuth parameter
+        undefined, // authStrategies parameter
       );
     });
 
@@ -201,6 +273,27 @@ describe('newCommand', () => {
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining(`Creating project: ${mockProjectName}`),
       );
+    });
+  });
+
+  describe('dry-run mode', () => {
+    it('should not create project files when --dry-run flag is set', async () => {
+      const dryRunOptions: NewCommandOptions = {
+        ...mockOptions,
+        dryRun: true,
+      };
+
+      try {
+        await newCommand(mockProjectName, dryRunOptions);
+      } catch (error) {
+        // Expected error from process.exit
+      }
+
+      // Verify no file creation occurred
+      expect(fs.ensureDirSync).not.toHaveBeenCalled();
+      expect(FileGeneratorService.generateBaseFiles).not.toHaveBeenCalled();
+      expect(FileGeneratorService.generateSourceFiles).not.toHaveBeenCalled();
+      expect(PackageInstallerService.install).not.toHaveBeenCalled();
     });
   });
 
@@ -255,6 +348,19 @@ describe('newCommand', () => {
       );
 
       expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it('should exit if git is not installed and --no-git is not provided', async () => {
+      (GitService.ensureGitInstalled as jest.Mock).mockImplementation(() => {
+        throw new Error('git not found');
+      });
+
+      await expect(newCommand(mockProjectName, mockOptions)).rejects.toThrow(
+        'process.exit: 1',
+      );
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(GitService.initialize).not.toHaveBeenCalled();
     });
   });
 

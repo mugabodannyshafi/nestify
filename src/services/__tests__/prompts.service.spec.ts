@@ -21,9 +21,6 @@ describe('PromptsService', () => {
         description: 'Test app',
         author: 'Test Author',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -60,6 +57,16 @@ describe('PromptsService', () => {
             name: 'useDocker',
             message: 'Add Docker support?',
           }),
+          expect.objectContaining({
+            type: 'confirm',
+            name: 'useGraphQL',
+            message: 'Add GraphQL support?',
+          }),
+          expect.objectContaining({
+            type: 'confirm',
+            name: 'useAuth',
+            message: 'Would you like to set up authentication?',
+          }),
         ]),
       );
     });
@@ -71,9 +78,6 @@ describe('PromptsService', () => {
         author: 'John Doe',
         useDocker: true,
         database: Database.POSTGRES,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -89,9 +93,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -112,9 +113,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -135,9 +133,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -160,9 +155,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -181,9 +173,6 @@ describe('PromptsService', () => {
         description: 'A NestJS application',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -204,9 +193,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -225,9 +211,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -246,9 +229,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -268,9 +248,6 @@ describe('PromptsService', () => {
           description: 'Test',
           author: '',
           useDocker: false,
-          useSwagger: false,
-          useGraphQL: false,
-          useGitHubActions: false,
         };
 
         mockPrompt.mockResolvedValue(mockAnswers);
@@ -289,9 +266,6 @@ describe('PromptsService', () => {
           author: '',
           useDocker: true,
           database: db,
-          useSwagger: false,
-          useGraphQL: false,
-          useGitHubActions: false,
         };
 
         mockPrompt.mockResolvedValue(mockAnswers);
@@ -308,9 +282,6 @@ describe('PromptsService', () => {
         description: 'Test',
         author: '',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -328,9 +299,6 @@ describe('PromptsService', () => {
         author: '',
         useDocker: true,
         database: Database.POSTGRES,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       mockPrompt.mockResolvedValue(mockAnswers);
@@ -339,6 +307,173 @@ describe('PromptsService', () => {
 
       expect(result.useDocker).toBe(true);
       expect(result.database).toBe(Database.POSTGRES);
+    });
+  });
+
+  describe('input validation', () => {
+    it('should validate description field', async () => {
+      const mockAnswers: ProjectAnswers = {
+        packageManager: PackageManager.NPM,
+        description: 'A NestJS application',
+        author: '',
+        useDocker: false,
+      };
+
+      mockPrompt.mockResolvedValue(mockAnswers);
+
+      await PromptsService.getProjectDetails();
+
+      const promptCall = mockPrompt.mock.calls[0][0];
+      const descriptionPrompt = promptCall.find(
+        (q: any) => q.name === 'description',
+      );
+
+      expect(descriptionPrompt.validate).toBeDefined();
+      expect(descriptionPrompt.validate('valid description')).toBe(true);
+      expect(descriptionPrompt.validate('')).toBe(
+        'Description cannot be empty.',
+      );
+    });
+
+    it('should reject descriptions longer than 200 characters', async () => {
+      const mockAnswers: ProjectAnswers = {
+        packageManager: PackageManager.NPM,
+        description: 'A NestJS application',
+        author: '',
+        useDocker: false,
+      };
+
+      mockPrompt.mockResolvedValue(mockAnswers);
+
+      await PromptsService.getProjectDetails();
+
+      const promptCall = mockPrompt.mock.calls[0][0];
+      const descriptionPrompt = promptCall.find(
+        (q: any) => q.name === 'description',
+      );
+
+      const longDescription = 'a'.repeat(201);
+      expect(descriptionPrompt.validate(longDescription)).toContain('too long');
+    });
+
+    it('should validate author field', async () => {
+      const mockAnswers: ProjectAnswers = {
+        packageManager: PackageManager.NPM,
+        description: 'Test',
+        author: 'John Doe',
+        useDocker: false,
+      };
+
+      mockPrompt.mockResolvedValue(mockAnswers);
+
+      await PromptsService.getProjectDetails();
+
+      const promptCall = mockPrompt.mock.calls[0][0];
+      const authorPrompt = promptCall.find((q: any) => q.name === 'author');
+
+      expect(authorPrompt.validate).toBeDefined();
+      expect(authorPrompt.validate('John Doe')).toBe(true);
+      expect(authorPrompt.validate('')).toBe(true); // Empty is allowed
+    });
+
+    it('should reject author names longer than 100 characters', async () => {
+      const mockAnswers: ProjectAnswers = {
+        packageManager: PackageManager.NPM,
+        description: 'Test',
+        author: '',
+        useDocker: false,
+      };
+
+      mockPrompt.mockResolvedValue(mockAnswers);
+
+      await PromptsService.getProjectDetails();
+
+      const promptCall = mockPrompt.mock.calls[0][0];
+      const authorPrompt = promptCall.find((q: any) => q.name === 'author');
+
+      const longAuthor = 'a'.repeat(101);
+      expect(authorPrompt.validate(longAuthor)).toContain('too long');
+    });
+
+    it('should validate package manager input', async () => {
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      const mockAnswers: ProjectAnswers = {
+        packageManager: PackageManager.NPM,
+        description: 'Test',
+        author: '',
+        useDocker: false,
+      };
+
+      mockPrompt.mockResolvedValue(mockAnswers);
+
+      await PromptsService.getProjectDetails('invalid-pm');
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid package manager'),
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it('should use default package manager if invalid one is provided', async () => {
+      const mockAnswers: ProjectAnswers = {
+        packageManager: PackageManager.NPM,
+        description: 'Test',
+        author: '',
+        useDocker: false,
+      };
+
+      mockPrompt.mockResolvedValue(mockAnswers);
+
+      await PromptsService.getProjectDetails('invalid-pm');
+
+      const promptCall = mockPrompt.mock.calls[0][0];
+      const packageManagerPrompt = promptCall.find(
+        (q: any) => q.name === 'packageManager',
+      );
+
+      expect(packageManagerPrompt.default).toBe(PackageManager.NPM);
+    });
+  });
+
+  describe('ORM validation', () => {
+    it('should validate ORM compatibility with database', async () => {
+      const mockAnswers: ProjectAnswers = {
+        packageManager: PackageManager.NPM,
+        description: 'Test',
+        author: '',
+        useDocker: true,
+        database: Database.POSTGRES,
+      };
+
+      mockPrompt
+        .mockResolvedValueOnce(mockAnswers)
+        .mockResolvedValueOnce({ orm: 'TypeORM' });
+
+      const result = await PromptsService.getProjectDetails();
+
+      expect(result.orm).toBe('TypeORM');
+    });
+  });
+
+  describe('authentication validation', () => {
+    it('should validate authentication strategies', async () => {
+      const mockAnswers: ProjectAnswers = {
+        packageManager: PackageManager.NPM,
+        description: 'Test',
+        author: '',
+        useDocker: false,
+        useAuth: true,
+      };
+
+      mockPrompt
+        .mockResolvedValueOnce(mockAnswers)
+        .mockResolvedValueOnce({ authStrategies: ['jwt'] });
+
+      const result = await PromptsService.getProjectDetails();
+
+      expect(result.authStrategies).toEqual(['jwt']);
     });
   });
 });

@@ -1,11 +1,25 @@
 import inquirer from 'inquirer';
 import { ProjectAnswers } from '../types/project.types';
 import { PackageManager, Database, ORM } from '../constants/enums';
+import { ValidationService } from './validation.service';
 
 export class PromptsService {
   static async getProjectDetails(
     defaultPackageManager?: string,
   ): Promise<ProjectAnswers> {
+    // Validate provided package manager
+    if (
+      defaultPackageManager &&
+      !Object.values(PackageManager).includes(
+        defaultPackageManager as PackageManager,
+      )
+    ) {
+      console.warn(
+        `⚠️  Invalid package manager: ${defaultPackageManager}. Using default (npm)`,
+      );
+      defaultPackageManager = PackageManager.NPM;
+    }
+
     const answers: Partial<ProjectAnswers> = await inquirer.prompt([
       {
         type: 'list',
@@ -19,12 +33,27 @@ export class PromptsService {
         name: 'description',
         message: 'Project description:',
         default: 'A NestJS application',
+        validate: (input: string) => {
+          if (!input || input.trim().length === 0) {
+            return 'Description cannot be empty.';
+          }
+          if (input.length > 200) {
+            return 'Description is too long (max 200 characters).';
+          }
+          return true;
+        },
       },
       {
         type: 'input',
         name: 'author',
         message: 'Author:',
         default: '',
+        validate: (input: string) => {
+          if (input && input.length > 100) {
+            return 'Author name is too long (max 100 characters).';
+          }
+          return true;
+        },
       },
       {
         type: 'list',
@@ -41,21 +70,15 @@ export class PromptsService {
       },
       {
         type: 'confirm',
-        name: 'useSwagger',
-        message: 'Add Swagger documentation?',
-        default: true,
-      },
-      {
-        type: 'confirm',
         name: 'useGraphQL',
         message: 'Add GraphQL support?',
         default: false,
       },
       {
         type: 'confirm',
-        name: 'useGitHubActions',
-        message: 'Add GitHub Actions for CI/CD?',
-        default: true,
+        name: 'useAuth',
+        message: 'Would you like to set up authentication?',
+        default: false,
       },
     ]);
 
@@ -74,6 +97,45 @@ export class PromptsService {
         },
       ]);
       answers.orm = ormAnswer.orm;
+
+      // Validate ORM compatibility
+      const ormErrors = ValidationService.validateORM(
+        answers.orm || '',
+        answers.database,
+      );
+      if (ormErrors.length > 0) {
+        console.warn(`⚠️  ORM validation issue: ${ormErrors[0].message}`);
+      }
+    }
+
+    if (answers.useAuth) {
+      const authAnswer = await inquirer.prompt([
+        {
+          type: 'checkbox',
+          name: 'authStrategies',
+          message: 'Select authentication strategies:',
+          choices: [
+            { name: 'JWT', value: 'jwt', checked: true },
+            // { name: 'OAuth', value: 'oauth' },
+            // { name: 'RBAC (Role-Based Access Control)', value: 'rbac' },
+            // { name: 'Email Verification', value: 'email-verification' },
+          ],
+          validate: (answer) => {
+            if (answer.length < 1) {
+              return 'You must choose at least one authentication strategy.';
+            }
+            // Validate strategies
+            const strategyErrors = ValidationService.validateAuthStrategies(
+              (answer as unknown as string[]) || [],
+            );
+            if (strategyErrors.length > 0) {
+              return strategyErrors[0].message;
+            }
+            return true;
+          },
+        },
+      ]);
+      answers.authStrategies = authAnswer.authStrategies;
     }
 
     return answers as ProjectAnswers;

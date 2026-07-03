@@ -49,7 +49,7 @@ describe('PackageInstallerService', () => {
       expect(deps).toContain('@nestjs/swagger');
       expect(deps).toContain('@nestjs/common');
       expect(deps).toContain('@nestjs/core');
-      expect(deps).toHaveLength(7);
+      expect(deps).toHaveLength(9);
     });
 
     it('should include GraphQL dependencies when useGraphQL is true', () => {
@@ -61,9 +61,19 @@ describe('PackageInstallerService', () => {
 
       expect(deps).toContain('@nestjs/graphql');
       expect(deps).toContain('@nestjs/apollo');
+      expect(deps).toContain('@apollo/server');
       expect(deps).toContain('graphql');
+      expect(deps).toContain('graphql-ws');
+      expect(deps).toContain('graphql-subscriptions');
       expect(deps).toContain('dataloader');
-      expect(deps).toHaveLength(12);
+      expect(deps).toHaveLength(16);
+    });
+
+    it('should not include GraphQL dependencies when useGraphQL is false', () => {
+      const deps = PackageInstallerService.getDependencies();
+
+      expect(deps).not.toContain('@nestjs/graphql');
+      expect(deps).not.toContain('dataloader');
     });
 
     it('should include TypeORM dependencies for MySQL', () => {
@@ -77,6 +87,17 @@ describe('PackageInstallerService', () => {
       expect(deps).toContain('mysql2');
     });
 
+    it('should include TypeORM dependencies for PostgreSQL', () => {
+      const deps = PackageInstallerService.getDependencies(
+        Database.POSTGRES,
+        ORM.TYPEORM,
+      );
+
+      expect(deps).toContain('@nestjs/typeorm');
+      expect(deps).toContain('typeorm');
+      expect(deps).toContain('pg');
+    });
+
     it('should include Prisma dependencies for MySQL with Prisma ORM', () => {
       const deps = PackageInstallerService.getDependencies(
         Database.MYSQL,
@@ -86,6 +107,17 @@ describe('PackageInstallerService', () => {
       expect(deps).toContain('@prisma/client');
       expect(deps).not.toContain('@nestjs/typeorm');
       expect(deps).not.toContain('mysql2');
+    });
+
+    it('should include Prisma dependencies for PostgreSQL with Prisma ORM', () => {
+      const deps = PackageInstallerService.getDependencies(
+        Database.POSTGRES,
+        ORM.PRISMA,
+      );
+
+      expect(deps).toContain('@prisma/client');
+      expect(deps).not.toContain('@nestjs/typeorm');
+      expect(deps).not.toContain('pg');
     });
 
     it('should include Mongoose dependencies for MongoDB', () => {
@@ -104,14 +136,14 @@ describe('PackageInstallerService', () => {
       expect(devDeps).toContain('@nestjs/testing');
       expect(devDeps).toContain('typescript');
       expect(devDeps).toContain('jest');
-      expect(devDeps).toHaveLength(24);
+      expect(devDeps).toHaveLength(23);
     });
 
     it('should include Prisma in dev dependencies when using Prisma ORM', () => {
       const devDeps = PackageInstallerService.getDevDependencies(ORM.PRISMA);
 
       expect(devDeps).toContain('prisma');
-      expect(devDeps).toHaveLength(25);
+      expect(devDeps).toHaveLength(24);
     });
   });
 

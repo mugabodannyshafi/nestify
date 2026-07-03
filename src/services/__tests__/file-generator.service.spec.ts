@@ -47,9 +47,7 @@ describe('FileGeneratorService', () => {
       useDocker: true,
       database: Database.POSTGRES,
       orm: undefined,
-      useSwagger: false,
       useGraphQL: false,
-      useGitHubActions: false,
     },
   };
 
@@ -354,7 +352,7 @@ describe('FileGeneratorService', () => {
   });
 
   describe('generateGitHubActionsFiles', () => {
-    it('should generate GitHub Actions workflow when useGitHubActions is true', () => {
+    it('should generate GitHub Actions workflow', () => {
       const mockWorkflow = 'name: Tests\non: push';
       (
         GitHubActionsGenerator.generateTestWorkflow as jest.Mock
@@ -372,6 +370,51 @@ describe('FileGeneratorService', () => {
         path.join(mockConfig.path, '.github', 'workflows', 'tests.yml'),
         mockWorkflow,
       );
+    });
+  });
+
+  describe('generateGraphQLFiles', () => {
+    it('should generate GraphQL module, schema, resolver and dataloader service when useGraphQL is true', () => {
+      const configWithGraphQL: ProjectConfig = {
+        ...mockConfig,
+        answers: { ...mockConfig.answers, useGraphQL: true },
+      };
+
+      FileGeneratorService.generateGraphQLFiles(configWithGraphQL);
+
+      const graphqlPath = path.join(configWithGraphQL.path, 'src', 'graphql');
+
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'resolvers'),
+      );
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'schemas'),
+      );
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'dataloaders'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'graphql.module.ts'),
+        expect.stringContaining('GraphqlModule'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'schemas', 'base.schema.ts'),
+        expect.stringContaining('BaseEntity'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'resolvers', 'app.resolver.ts'),
+        expect.stringContaining('AppResolver'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'dataloaders', 'dataloader.service.ts'),
+        expect.stringContaining('DataLoaderService'),
+      );
+    });
+
+    it('should not generate GraphQL files when useGraphQL is false', () => {
+      FileGeneratorService.generateGraphQLFiles(mockConfig);
+
+      expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
   });
 

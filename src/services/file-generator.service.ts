@@ -22,6 +22,32 @@ import { createReadme } from '../templates/readme.template';
 import { createDatabaseModule } from '../templates/database-module.template';
 import { Database, ORM } from '../constants/enums';
 import { PackageInstallerService } from './package-installer.service';
+import { createAuthModule } from '../templates/auth/jwt/auth.module.template';
+import { createAuthService } from '../templates/auth/jwt/auth.service.template';
+import { createAuthController } from '../templates/auth/jwt/auth.controller.template';
+import { createJwtStrategy } from '../templates/auth/jwt/jwt.strategy.template';
+import { createLocalStrategy } from '../templates/auth/jwt/local.strategy.template';
+import { createJwtAuthGuard } from '../templates/auth/jwt/jwt-auth.guard.template';
+import { createLocalAuthGuard } from '../templates/auth/jwt/local-auth.guard.template';
+import { createUserService } from '../templates/auth/jwt/user/user.service.template';
+import { createUserEntityTypeORM } from '../templates/auth/jwt/user/user.entity.template';
+import { createUserModule } from '../templates/auth/jwt/user/user.module.template';
+import { createUserPrismaSchema } from '../templates/auth/jwt/user/user.model.template';
+import { createUserSchemaMongoose } from '../templates/auth/jwt/user/user.schema.template';
+import chalk from 'chalk';
+import { createUserController } from '../templates/auth/jwt/user/user.controller.template';
+import { createRegisterDto } from '../templates/auth/jwt/dto/register.dto.template';
+import { createLoginDto } from '../templates/auth/jwt/dto/login.dto.template';
+import { createAuthServiceSpec } from '../templates/auth/jwt/auth.service.spec.template';
+import { createAuthControllerSpec } from '../templates/auth/jwt/auth.controller.spec.template';
+import { createUserServiceSpec } from '../templates/auth/jwt/user/user.service.spec.template';
+import { createUserControllerSpec } from '../templates/auth/jwt/user/user.controller.spec.template';
+import { createAuthE2ESpec } from '../templates/auth/jwt/auth.e2e-spec.template';
+import { createUserE2ESpec } from '../templates/auth/jwt/user/user.e2e-spec.template';
+import { createGraphQLModuleTemplate } from '../templates/graphql/graphql-module.template';
+import { createBaseSchemaTemplate } from '../templates/graphql/base-schema.template';
+import { createExampleResolverTemplate } from '../templates/graphql/app-resolver.template';
+import { createDataLoaderServiceTemplate } from '../templates/graphql/dataloader.template';
 
 export class FileGeneratorService {
   static generateBaseFiles(config: ProjectConfig): void {
@@ -41,6 +67,10 @@ export class FileGeneratorService {
       JSON.stringify(
         {
           extends: './tsconfig.json',
+          compilerOptions: {
+            rootDir: './src',
+            ignoreDeprecations: '6.0',
+          },
           exclude: ['node_modules', 'test', 'dist', '**/*spec.ts'],
         },
         null,
@@ -58,7 +88,12 @@ export class FileGeneratorService {
     fs.writeFileSync(path.join(srcPath, 'main.ts'), createMainTs());
     fs.writeFileSync(
       path.join(srcPath, 'app.module.ts'),
-      createAppModule(answers.database, answers.orm),
+      createAppModule(
+        answers.database,
+        answers.orm,
+        answers.useAuth,
+        answers.useGraphQL,
+      ),
     );
     fs.writeFileSync(
       path.join(srcPath, 'app.controller.ts'),
@@ -118,6 +153,16 @@ export class FileGeneratorService {
     );
 
     fs.writeFileSync(
+      path.join(testPath, 'auth.e2e-spec.ts'),
+      createAuthE2ESpec(config.answers.orm),
+    );
+
+    fs.writeFileSync(
+      path.join(testPath, 'users.e2e-spec.ts'),
+      createUserE2ESpec(config.answers.orm),
+    );
+
+    fs.writeFileSync(
       path.join(testPath, 'jest-e2e.json'),
       createJestE2EConfig(),
     );
@@ -166,87 +211,31 @@ export class FileGeneratorService {
     const graphqlPath = path.join(config.path, 'src', 'graphql');
     const resolversPath = path.join(graphqlPath, 'resolvers');
     const schemasPath = path.join(graphqlPath, 'schemas');
+    const dataLoadersPath = path.join(graphqlPath, 'dataloaders');
 
     fs.ensureDirSync(resolversPath);
     fs.ensureDirSync(schemasPath);
+    fs.ensureDirSync(dataLoadersPath);
 
-    // Generate GraphQL module
-    const graphqlModuleContent = this.createGraphQLModuleTemplate();
     fs.writeFileSync(
       path.join(graphqlPath, 'graphql.module.ts'),
-      graphqlModuleContent,
+      createGraphQLModuleTemplate(),
     );
 
-    // Generate base schema
-    const baseSchemaContent = this.createBaseSchemaTemplate();
     fs.writeFileSync(
       path.join(schemasPath, 'base.schema.ts'),
-      baseSchemaContent,
+      createBaseSchemaTemplate(),
     );
 
-    // Generate example resolver
-    const exampleResolverContent = this.createExampleResolverTemplate();
     fs.writeFileSync(
       path.join(resolversPath, 'app.resolver.ts'),
-      exampleResolverContent,
+      createExampleResolverTemplate(),
     );
-  }
 
-  private static createGraphQLModuleTemplate(): string {
-    return `import { Module } from '@nestjs/common';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
-import { AppResolver } from './resolvers/app.resolver';
-
-@Module({
-  imports: [
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: true,
-      introspection: true,
-    }),
-  ],
-  providers: [AppResolver],
-})
-export class GraphqlModule {}
-`;
-  }
-
-  private static createBaseSchemaTemplate(): string {
-    return `import { ObjectType, Field, ID } from '@nestjs/graphql';
-
-@ObjectType()
-export class BaseEntity {
-  @Field(() => ID)
-  id: string;
-
-  @Field()
-  createdAt: Date;
-
-  @Field()
-  updatedAt: Date;
-}
-`;
-  }
-
-  private static createExampleResolverTemplate(): string {
-    return `import { Resolver, Query } from '@nestjs/graphql';
-
-@Resolver()
-export class AppResolver {
-  @Query(() => String)
-  hello(): string {
-    return 'Hello GraphQL World!';
-  }
-
-  @Query(() => String)
-  getTime(): string {
-    return new Date().toISOString();
-  }
-}
-`;
+    fs.writeFileSync(
+      path.join(dataLoadersPath, 'dataloader.service.ts'),
+      createDataLoaderServiceTemplate(),
+    );
   }
 
   static generateReadme(config: ProjectConfig): void {
@@ -268,6 +257,150 @@ export class AppResolver {
       config.answers.database,
       config.answers.orm,
       config.answers.useGraphQL,
+      config.answers.useAuth,
+      config.answers.authStrategies,
     );
+  }
+
+  static generateAuthFiles(config: ProjectConfig): void {
+    const { path: projectPath, answers } = config;
+
+    if (!answers.useAuth || !answers.authStrategies) {
+      return;
+    }
+
+    const authPath = path.join(projectPath, 'src/modules/auth');
+    const userPath = path.join(projectPath, 'src/modules/user');
+    const controllersPath = path.join(authPath, 'controllers');
+    const servicesPath = path.join(authPath, 'services');
+    const dtoPath = path.join(authPath, 'dto');
+    const strategiesPath = path.join(authPath, 'strategies');
+
+    const userControllersPath = path.join(userPath, 'controllers');
+    const userServicesPath = path.join(userPath, 'services');
+    const userDtoPath = path.join(userPath, 'dto');
+    const userSchemasPath = path.join(userPath, 'schemas'); // For Mongoose
+
+    const guardsPath = path.join(projectPath, 'src/common/guards');
+
+    // Create directories
+    fs.ensureDirSync(authPath);
+    fs.ensureDirSync(userPath);
+    fs.ensureDirSync(controllersPath);
+    fs.ensureDirSync(servicesPath);
+    fs.ensureDirSync(dtoPath);
+    fs.ensureDirSync(strategiesPath);
+    fs.ensureDirSync(userControllersPath);
+    fs.ensureDirSync(userServicesPath);
+    fs.ensureDirSync(userDtoPath);
+    fs.ensureDirSync(guardsPath);
+
+    if (answers.orm !== ORM.TYPEORM && answers.orm !== ORM.PRISMA) {
+      fs.ensureDirSync(userSchemasPath);
+    }
+
+    // Check if JWT is selected
+    if (answers.authStrategies.includes('jwt')) {
+      // Generate main auth files
+      fs.writeFileSync(
+        path.join(authPath, 'auth.module.ts'),
+        createAuthModule(answers.orm),
+      );
+      fs.writeFileSync(
+        path.join(servicesPath, 'auth.service.ts'),
+        createAuthService(),
+      );
+      fs.writeFileSync(
+        path.join(servicesPath, 'auth.service.spec.ts'),
+        createAuthServiceSpec(),
+      );
+      fs.writeFileSync(
+        path.join(controllersPath, 'auth.controller.ts'),
+        createAuthController(),
+      );
+      fs.writeFileSync(
+        path.join(controllersPath, 'auth.controller.spec.ts'),
+        createAuthControllerSpec(),
+      );
+
+      // Generate DTOs
+      fs.writeFileSync(path.join(dtoPath, 'login.dto.ts'), createLoginDto());
+      fs.writeFileSync(
+        path.join(dtoPath, 'register.dto.ts'),
+        createRegisterDto(),
+      );
+
+      // Generate strategies
+      fs.writeFileSync(
+        path.join(strategiesPath, 'jwt.strategy.ts'),
+        createJwtStrategy(),
+      );
+      fs.writeFileSync(
+        path.join(strategiesPath, 'local.strategy.ts'),
+        createLocalStrategy(),
+      );
+
+      // Generate guards in common folder
+      fs.writeFileSync(
+        path.join(guardsPath, 'jwt-auth.guard.ts'),
+        createJwtAuthGuard(),
+      );
+      fs.writeFileSync(
+        path.join(guardsPath, 'local-auth.guard.ts'),
+        createLocalAuthGuard(),
+      );
+
+      // Generate user module files
+      fs.writeFileSync(
+        path.join(userServicesPath, 'user.service.ts'),
+        createUserService(answers.orm),
+      );
+      fs.writeFileSync(
+        path.join(userServicesPath, 'user.service.spec.ts'),
+        createUserServiceSpec(answers.orm),
+      );
+      fs.writeFileSync(
+        path.join(userControllersPath, 'user.controller.ts'),
+        createUserController(),
+      );
+      fs.writeFileSync(
+        path.join(userControllersPath, 'user.controller.spec.ts'),
+        createUserControllerSpec(),
+      );
+      fs.writeFileSync(
+        path.join(userPath, 'user.module.ts'),
+        createUserModule(answers.orm),
+      );
+
+      // Generate ORM-specific user files
+      if (answers.orm === ORM.TYPEORM) {
+        const entitiesPath = path.join(projectPath, 'src/database/entities');
+        fs.ensureDirSync(entitiesPath);
+        fs.writeFileSync(
+          path.join(entitiesPath, 'user.entity.ts'),
+          createUserEntityTypeORM(),
+        );
+      } else if (answers.orm === ORM.PRISMA) {
+        const prismaNote = createUserPrismaSchema();
+        fs.writeFileSync(
+          path.join(projectPath, 'PRISMA_USER_MODEL.md'),
+          prismaNote,
+        );
+        console.log(
+          chalk.yellow(
+            '\n⚠️  Please add the User model to your prisma/schema.prisma file.',
+          ),
+        );
+        console.log(
+          chalk.cyan('   See PRISMA_USER_MODEL.md for the model definition.\n'),
+        );
+      } else {
+        // Mongoose
+        fs.writeFileSync(
+          path.join(userSchemasPath, 'user.schema.ts'),
+          createUserSchemaMongoose(),
+        );
+      }
+    }
   }
 }

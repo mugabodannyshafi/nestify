@@ -3,6 +3,13 @@ import fs from 'fs-extra';
 import path from 'path';
 import ora, { Ora } from 'ora';
 import { toPascalCase } from '../utils/string.utils';
+import { createGraphQLModuleTemplate } from '../templates/graphql/graphql-module.template';
+import { createBaseSchemaTemplate } from '../templates/graphql/base-schema.template';
+import { createExampleResolverTemplate } from '../templates/graphql/app-resolver.template';
+import {
+  createDataLoaderTemplate,
+  createDataLoaderServiceTemplate,
+} from '../templates/graphql/dataloader.template';
 
 type Schematic = 'graphql' | 'resolver' | 'schema' | 'dataloader';
 
@@ -17,7 +24,6 @@ export async function generateCommand(schematic: string, name: string) {
   const spinner = ora();
 
   try {
-    // Validate schematic type
     if (!VALID_SCHEMATICS.includes(schematic as Schematic)) {
       console.log(chalk.red(`❌ Invalid schematic: ${schematic}`));
       console.log(
@@ -26,7 +32,6 @@ export async function generateCommand(schematic: string, name: string) {
       process.exit(1);
     }
 
-    // Check if we're in a NestJS project
     if (!fs.existsSync('package.json') || !fs.existsSync('src')) {
       console.log(chalk.red('❌ Not in a NestJS project directory'));
       console.log(chalk.gray('Run this command from your project root'));
@@ -65,7 +70,6 @@ export async function generateCommand(schematic: string, name: string) {
 async function setupGraphQL(spinner: Ora) {
   spinner.start('Setting up GraphQL configuration...');
 
-  // Create GraphQL directories
   const graphqlPath = path.join('src', 'graphql');
   const resolversPath = path.join(graphqlPath, 'resolvers');
   const schemasPath = path.join(graphqlPath, 'schemas');
@@ -74,38 +78,31 @@ async function setupGraphQL(spinner: Ora) {
   fs.ensureDirSync(resolversPath);
   fs.ensureDirSync(schemasPath);
   fs.ensureDirSync(dataLoadersPath);
-  // Generate GraphQL module
+
   spinner.text = 'Creating GraphQL module...';
-  const graphqlModuleContent = createGraphQLModuleTemplate();
   fs.writeFileSync(
     path.join(graphqlPath, 'graphql.module.ts'),
-    graphqlModuleContent,
+    createGraphQLModuleTemplate(),
   );
 
-  // Generate base schema
   spinner.text = 'Creating base schema...';
-  const baseSchemaContent = createBaseSchemaTemplate();
-  fs.writeFileSync(path.join(schemasPath, 'base.schema.ts'), baseSchemaContent);
+  fs.writeFileSync(
+    path.join(schemasPath, 'base.schema.ts'),
+    createBaseSchemaTemplate(),
+  );
 
-  // Generate example resolver
   spinner.text = 'Creating example resolver...';
-  const exampleResolverContent = createExampleResolverTemplate();
   fs.writeFileSync(
     path.join(resolversPath, 'app.resolver.ts'),
-    exampleResolverContent,
+    createExampleResolverTemplate(),
   );
 
-  // Generate DataLoader service
   spinner.text = 'Creating DataLoader service...';
-  const {
-    createDataLoaderServiceTemplate,
-  } = require('../templates/dataloader.template');
-  const dataLoaderServiceContent = createDataLoaderServiceTemplate();
   fs.writeFileSync(
     path.join(dataLoadersPath, 'dataloader.service.ts'),
-    dataLoaderServiceContent,
+    createDataLoaderServiceTemplate(),
   );
-  // Update app.module.ts
+
   spinner.text = 'Updating app module...';
   updateAppModuleForGraphQL();
 
@@ -115,7 +112,7 @@ async function setupGraphQL(spinner: Ora) {
   console.log(chalk.gray('1. Install GraphQL dependencies:'));
   console.log(
     chalk.white(
-      '   npm install @nestjs/graphql @nestjs/apollo graphql apollo-server-express dataloader',
+      '   npm install @nestjs/graphql @nestjs/apollo @apollo/server graphql graphql-ws graphql-subscriptions dataloader',
     ),
   );
   console.log(chalk.gray('2. Generate components:'));
@@ -133,8 +130,10 @@ async function generateResolver(name: string, spinner: Ora) {
   spinner.start('Creating resolver...');
   fs.ensureDirSync(resolverPath);
 
-  const resolverContent = createResolverTemplate(name);
-  fs.writeFileSync(path.join(resolverPath, fileName), resolverContent);
+  fs.writeFileSync(
+    path.join(resolverPath, fileName),
+    createResolverTemplate(name),
+  );
 
   spinner.succeed(`Resolver created: src/graphql/resolvers/${fileName}`);
 }
@@ -146,8 +145,7 @@ async function generateSchema(name: string, spinner: Ora) {
   spinner.start('Creating schema...');
   fs.ensureDirSync(schemaPath);
 
-  const schemaContent = createSchemaTemplate(name);
-  fs.writeFileSync(path.join(schemaPath, fileName), schemaContent);
+  fs.writeFileSync(path.join(schemaPath, fileName), createSchemaTemplate(name));
 
   spinner.succeed(`Schema created: src/graphql/schemas/${fileName}`);
 }
@@ -159,117 +157,19 @@ async function generateDataLoader(name: string, spinner: Ora) {
   spinner.start('Creating DataLoader...');
   fs.ensureDirSync(dataLoaderPath);
 
-  const {
-    createDataLoaderTemplate,
-  } = require('../templates/dataloader.template');
-  const dataLoaderContent = createDataLoaderTemplate(name);
-  fs.writeFileSync(path.join(dataLoaderPath, fileName), dataLoaderContent);
+  fs.writeFileSync(
+    path.join(dataLoaderPath, fileName),
+    createDataLoaderTemplate(name),
+  );
 
   spinner.succeed(`DataLoader created: src/graphql/dataloaders/${fileName}`);
-}
-
-function createGraphQLModuleTemplate(): string {
-  return `import { Module } from '@nestjs/common';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
-import { AppResolver } from './resolvers/app.resolver';
-import { DataLoaderService } from './dataloaders/dataloader.service';
-
-@Module({
-  imports: [
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: true,
-      introspection: true,
-      subscriptions: {
-        'graphql-ws': true,
-        'subscriptions-transport-ws': true,
-      },
-      context: ({ req, res }) => ({
-        req,
-        res,
-        dataloaders: new Map(),
-      }),
-    }),
-  ],
-  providers: [AppResolver, DataLoaderService],
-  exports: [DataLoaderService],
-})
-export class GraphqlModule {}
-`;
-}
-
-function createBaseSchemaTemplate(): string {
-  return `import { ObjectType, Field, ID } from '@nestjs/graphql';
-
-@ObjectType()
-export class BaseEntity {
-  @Field(() => ID)
-  id: string;
-
-  @Field()
-  createdAt: Date;
-
-  @Field()
-  updatedAt: Date;
-}
-
-@ObjectType()
-export class PaginationInfo {
-  @Field()
-  hasNextPage: boolean;
-
-  @Field()
-  hasPreviousPage: boolean;
-
-  @Field({ nullable: true })
-  startCursor?: string;
-
-  @Field({ nullable: true })
-  endCursor?: string;
-}
-`;
-}
-
-function createExampleResolverTemplate(): string {
-  return `import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
-import { PubSub } from 'graphql-subscriptions';
-
-const pubSub = new PubSub();
-
-@Resolver()
-export class AppResolver {
-  @Query(() => String)
-  hello(): string {
-    return 'Hello GraphQL World!';
-  }
-
-  @Query(() => String)
-  getTime(): string {
-    return new Date().toISOString();
-  }
-
-  @Mutation(() => String)
-  async sendNotification(@Args('message') message: string): Promise<string> {
-    await pubSub.publish('notificationSent', { notification: message });
-    return \`Notification sent: \${message}\`;
-  }
-
-  @Subscription(() => String)
-  notification() {
-    return pubSub.asyncIterator('notificationSent');
-  }
-}
-`;
 }
 
 function createResolverTemplate(name: string): string {
   const className = toPascalCase(name);
 
-  return `import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
-import { ${className} } from '../schemas/${name}.schema';
+  return `import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { ${className}, Create${className}Input, Update${className}Input } from '../schemas/${name}.schema';
 import { ${className}DataLoader } from '../dataloaders/${name}.dataloader';
 
 @Resolver(() => ${className})
@@ -278,48 +178,36 @@ export class ${className}Resolver {
 
   @Query(() => [${className}])
   async ${name}s(): Promise<${className}[]> {
-    // TODO: Implement ${name}s query
     return [];
   }
 
   @Query(() => ${className}, { nullable: true })
   async ${name}(@Args('id', { type: () => ID }) id: string): Promise<${className} | null> {
-    // Use DataLoader for efficient loading
     return this.${name}DataLoader.load${className}(id);
   }
 
   @Query(() => [${className}])
   async ${name}sByIds(@Args('ids', { type: () => [ID] }) ids: string[]): Promise<(${className} | null)[]> {
-    // Batch load multiple items efficiently
     return this.${name}DataLoader.load${className}s(ids);
   }
 
   @Mutation(() => ${className})
-  async create${className}(
-    @Args('input') input: any, // TODO: Create proper input type
-  ): Promise<${className}> {
-    // TODO: Implement create${className} mutation
-    // Clear cache after mutation
-    // this.${name}DataLoader.clearAll();
+  async create${className}(@Args('input') input: Create${className}Input): Promise<${className}> {
     throw new Error('Not implemented');
   }
 
   @Mutation(() => ${className})
   async update${className}(
     @Args('id', { type: () => ID }) id: string,
-    @Args('input') input: any, // TODO: Create proper input type
+    @Args('input') input: Update${className}Input,
   ): Promise<${className}> {
-    // TODO: Implement update${className} mutation
-    // Clear specific item from cache
-    // this.${name}DataLoader.clear${className}(id);
+    this.${name}DataLoader.clear${className}(id);
     throw new Error('Not implemented');
   }
 
   @Mutation(() => Boolean)
   async delete${className}(@Args('id', { type: () => ID }) id: string): Promise<boolean> {
-    // TODO: Implement delete${className} mutation
-    // Clear specific item from cache
-    // this.${name}DataLoader.clear${className}(id);
+    this.${name}DataLoader.clear${className}(id);
     return false;
   }
 }
@@ -329,7 +217,7 @@ export class ${className}Resolver {
 function createSchemaTemplate(name: string): string {
   const className = toPascalCase(name);
 
-  return `import { ObjectType, Field, ID, InputType } from '@nestjs/graphql';
+  return `import { ObjectType, Field, InputType } from '@nestjs/graphql';
 import { BaseEntity } from './base.schema';
 
 @ObjectType()
@@ -364,20 +252,26 @@ export class Update${className}Input {
 function updateAppModuleForGraphQL() {
   const appModulePath = path.join('src', 'app.module.ts');
 
-  if (fs.existsSync(appModulePath)) {
-    let content = fs.readFileSync(appModulePath, 'utf8');
+  if (!fs.existsSync(appModulePath)) {
+    return;
+  }
 
-    // Add GraphQL import if not exists
-    if (!content.includes('GraphqlModule')) {
-      content = content.replace(
+  const content = fs.readFileSync(appModulePath, 'utf8');
+
+  if (content.includes('GraphqlModule')) {
+    return;
+  }
+
+  const withImport = content.includes("from './app.service';")
+    ? content.replace(
         "import { AppService } from './app.service';",
         "import { AppService } from './app.service';\nimport { GraphqlModule } from './graphql/graphql.module';",
-      );
+      )
+    : `import { GraphqlModule } from './graphql/graphql.module';\n${content}`;
 
-      // Add to imports array
-      content = content.replace('imports: [],', 'imports: [GraphqlModule],');
+  const withModule = /imports:\s*\[\s*\]/.test(withImport)
+    ? withImport.replace(/imports:\s*\[\s*\]/, 'imports: [GraphqlModule]')
+    : withImport.replace(/imports:\s*\[/, 'imports: [\n    GraphqlModule,');
 
-      fs.writeFileSync(appModulePath, content);
-    }
-  }
+  fs.writeFileSync(appModulePath, withModule);
 }

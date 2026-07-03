@@ -1,4 +1,5 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+export function createBaseSchemaTemplate(): string {
+  return `import { ObjectType, Field, ID } from '@nestjs/graphql';
 
 @ObjectType()
 export class BaseEntity {
@@ -25,4 +26,6 @@ export class PaginationInfo {
 
   @Field({ nullable: true })
   endCursor?: string;
+}
+`;
 }

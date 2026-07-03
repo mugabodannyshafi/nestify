@@ -1,4 +1,5 @@
-import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
+export function createExampleResolverTemplate(): string {
+  return `import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 
 const pubSub = new PubSub();
@@ -18,11 +19,13 @@ export class AppResolver {
   @Mutation(() => String)
   async sendNotification(@Args('message') message: string): Promise<string> {
     await pubSub.publish('notificationSent', { notification: message });
-    return `Notification sent: ${message}`;
+    return \`Notification sent: \${message}\`;
   }
 
   @Subscription(() => String)
   notification() {
-    return pubSub.asyncIterator('notificationSent');
+    return pubSub.asyncIterableIterator('notificationSent');
   }
+}
+`;
 }

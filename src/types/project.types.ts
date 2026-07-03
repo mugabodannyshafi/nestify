@@ -7,14 +7,16 @@ export interface ProjectAnswers {
   useDocker: boolean;
   database?: Database;
   orm?: ORM;
-  useSwagger: boolean;
-  useGraphQL: boolean;
-  useGitHubActions: boolean;
+  useAuth?: boolean;
+  authStrategies?: string[];
+  useGraphQL?: boolean;
 }
 
 export interface NewCommandOptions {
   packageManager: string;
   skipInstall: boolean;
+  dryRun?: boolean;
+  noGit?: boolean;
 }
 
 export interface ProjectConfig {

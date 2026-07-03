@@ -12,9 +12,6 @@ describe('Project Types', () => {
         author: 'Test Author',
         useDocker: true,
         database: Database.POSTGRES,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       expect(answers.packageManager).toBe(PackageManager.NPM);
@@ -30,9 +27,6 @@ describe('Project Types', () => {
         description: 'Test',
         author: 'Author',
         useDocker: false,
-        useSwagger: false,
-        useGraphQL: false,
-        useGitHubActions: false,
       };
 
       expect(answers.database).toBeUndefined();
@@ -62,9 +56,6 @@ describe('Project Types', () => {
           author: 'Developer',
           useDocker: true,
           database: Database.MONGODB,
-          useSwagger: false,
-          useGraphQL: false,
-          useGitHubActions: false,
         },
       };
 

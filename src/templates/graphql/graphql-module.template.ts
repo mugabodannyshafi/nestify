@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+export function createGraphQLModuleTemplate(): string {
+  return `import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { AppResolver } from './resolvers/app.resolver';
+import { DataLoaderService } from './dataloaders/dataloader.service';
 
 @Module({
   imports: [
@@ -13,10 +15,17 @@ import { AppResolver } from './resolvers/app.resolver';
       introspection: true,
       subscriptions: {
         'graphql-ws': true,
-        'subscriptions-transport-ws': true,
       },
+      context: ({ req, res }) => ({
+        req,
+        res,
+        dataloaders: new Map(),
+      }),
     }),
   ],
-  providers: [AppResolver],
+  providers: [AppResolver, DataLoaderService],
+  exports: [DataLoaderService],
 })
 export class GraphqlModule {}
+`;
+}
