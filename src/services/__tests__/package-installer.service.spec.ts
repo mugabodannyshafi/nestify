@@ -31,7 +31,7 @@ describe('PackageInstallerService', () => {
       warn: jest.fn().mockReturnThis(),
     };
 
-    (ora as jest.Mock).mockReturnValue(mockSpinner);
+    (ora as unknown as jest.Mock).mockReturnValue(mockSpinner);
 
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -50,6 +50,30 @@ describe('PackageInstallerService', () => {
       expect(deps).toContain('@nestjs/common');
       expect(deps).toContain('@nestjs/core');
       expect(deps).toHaveLength(9);
+    });
+
+    it('should include GraphQL dependencies when useGraphQL is true', () => {
+      const deps = PackageInstallerService.getDependencies(
+        undefined,
+        undefined,
+        true,
+      );
+
+      expect(deps).toContain('@nestjs/graphql');
+      expect(deps).toContain('@nestjs/apollo');
+      expect(deps).toContain('@apollo/server');
+      expect(deps).toContain('graphql');
+      expect(deps).toContain('graphql-ws');
+      expect(deps).toContain('graphql-subscriptions');
+      expect(deps).toContain('dataloader');
+      expect(deps).toHaveLength(16);
+    });
+
+    it('should not include GraphQL dependencies when useGraphQL is false', () => {
+      const deps = PackageInstallerService.getDependencies();
+
+      expect(deps).not.toContain('@nestjs/graphql');
+      expect(deps).not.toContain('dataloader');
     });
 
     it('should include TypeORM dependencies for MySQL', () => {

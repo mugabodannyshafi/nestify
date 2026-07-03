@@ -70,6 +70,12 @@ export class PromptsService {
       },
       {
         type: 'confirm',
+        name: 'useGraphQL',
+        message: 'Add GraphQL support?',
+        default: false,
+      },
+      {
+        type: 'confirm',
         name: 'useAuth',
         message: 'Would you like to set up authentication?',
         default: false,

@@ -44,6 +44,10 @@ import { createUserServiceSpec } from '../templates/auth/jwt/user/user.service.s
 import { createUserControllerSpec } from '../templates/auth/jwt/user/user.controller.spec.template';
 import { createAuthE2ESpec } from '../templates/auth/jwt/auth.e2e-spec.template';
 import { createUserE2ESpec } from '../templates/auth/jwt/user/user.e2e-spec.template';
+import { createGraphQLModuleTemplate } from '../templates/graphql/graphql-module.template';
+import { createBaseSchemaTemplate } from '../templates/graphql/base-schema.template';
+import { createExampleResolverTemplate } from '../templates/graphql/app-resolver.template';
+import { createDataLoaderServiceTemplate } from '../templates/graphql/dataloader.template';
 
 export class FileGeneratorService {
   static generateBaseFiles(config: ProjectConfig): void {
@@ -84,7 +88,12 @@ export class FileGeneratorService {
     fs.writeFileSync(path.join(srcPath, 'main.ts'), createMainTs());
     fs.writeFileSync(
       path.join(srcPath, 'app.module.ts'),
-      createAppModule(answers.database, answers.orm, answers.useAuth),
+      createAppModule(
+        answers.database,
+        answers.orm,
+        answers.useAuth,
+        answers.useGraphQL,
+      ),
     );
     fs.writeFileSync(
       path.join(srcPath, 'app.controller.ts'),
@@ -196,6 +205,39 @@ export class FileGeneratorService {
     fs.writeFileSync(path.join(workflowsPath, 'tests.yml'), workflowContent);
   }
 
+  static generateGraphQLFiles(config: ProjectConfig): void {
+    if (!config.answers.useGraphQL) return;
+
+    const graphqlPath = path.join(config.path, 'src', 'graphql');
+    const resolversPath = path.join(graphqlPath, 'resolvers');
+    const schemasPath = path.join(graphqlPath, 'schemas');
+    const dataLoadersPath = path.join(graphqlPath, 'dataloaders');
+
+    fs.ensureDirSync(resolversPath);
+    fs.ensureDirSync(schemasPath);
+    fs.ensureDirSync(dataLoadersPath);
+
+    fs.writeFileSync(
+      path.join(graphqlPath, 'graphql.module.ts'),
+      createGraphQLModuleTemplate(),
+    );
+
+    fs.writeFileSync(
+      path.join(schemasPath, 'base.schema.ts'),
+      createBaseSchemaTemplate(),
+    );
+
+    fs.writeFileSync(
+      path.join(resolversPath, 'app.resolver.ts'),
+      createExampleResolverTemplate(),
+    );
+
+    fs.writeFileSync(
+      path.join(dataLoadersPath, 'dataloader.service.ts'),
+      createDataLoaderServiceTemplate(),
+    );
+  }
+
   static generateReadme(config: ProjectConfig): void {
     const readmeContent = createReadme(
       config.name,
@@ -213,6 +255,10 @@ export class FileGeneratorService {
       config.path,
       config.answers.packageManager,
       config.answers.database,
+      config.answers.orm,
+      config.answers.useGraphQL,
+      config.answers.useAuth,
+      config.answers.authStrategies,
     );
   }
 

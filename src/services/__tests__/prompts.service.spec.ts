@@ -57,6 +57,16 @@ describe('PromptsService', () => {
             name: 'useDocker',
             message: 'Add Docker support?',
           }),
+          expect.objectContaining({
+            type: 'confirm',
+            name: 'useGraphQL',
+            message: 'Add GraphQL support?',
+          }),
+          expect.objectContaining({
+            type: 'confirm',
+            name: 'useAuth',
+            message: 'Would you like to set up authentication?',
+          }),
         ]),
       );
     });

@@ -4,6 +4,7 @@ export function createAppModule(
   database?: Database,
   orm?: ORM,
   useAuth?: boolean,
+  useGraphQL?: boolean,
 ): string {
   let imports = `import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -33,6 +34,11 @@ import { ConfigModule } from '@nestjs/config';`;
   if (useAuth) {
     imports += `\nimport { AuthModule } from './modules/auth/auth.module';`;
     modules.push('AuthModule');
+  }
+
+  if (useGraphQL) {
+    imports += `\nimport { GraphqlModule } from './graphql/graphql.module';`;
+    modules.push('GraphqlModule');
   }
 
   return `${imports}

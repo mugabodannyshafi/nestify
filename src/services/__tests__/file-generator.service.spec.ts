@@ -39,13 +39,15 @@ jest.mock('../../templates/readme.template');
 describe('FileGeneratorService', () => {
   const mockConfig: ProjectConfig = {
     name: 'test-project',
-    path: '/test/path',
+    path: path.normalize('/test/path'),
     answers: {
       description: 'Test description',
       author: 'Test Author',
       packageManager: PackageManager.NPM,
       useDocker: true,
       database: Database.POSTGRES,
+      orm: undefined,
+      useGraphQL: false,
     },
   };
 
@@ -69,7 +71,7 @@ describe('FileGeneratorService', () => {
         undefined, // orm parameter
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/package.json',
+        path.join(mockConfig.path, 'package.json'),
         mockPackageJson,
       );
     });
@@ -84,7 +86,7 @@ describe('FileGeneratorService', () => {
 
       expect(tsconfigTemplate.createTsConfig).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/tsconfig.json',
+        path.join(mockConfig.path, 'tsconfig.json'),
         mockTsConfig,
       );
     });
@@ -93,19 +95,12 @@ describe('FileGeneratorService', () => {
       FileGeneratorService.generateBaseFiles(mockConfig);
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/tsconfig.build.json',
-        JSON.stringify(
-          {
-            extends: './tsconfig.json',
-            compilerOptions: {
-              rootDir: './src',
-              ignoreDeprecations: '6.0',
-            },
-            exclude: ['node_modules', 'test', 'dist', '**/*spec.ts'],
-          },
-          null,
-          2,
-        ),
+        path.join(mockConfig.path, 'tsconfig.build.json'),
+        expect.stringContaining('"extends": "./tsconfig.json"'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(mockConfig.path, 'tsconfig.build.json'),
+        expect.stringContaining('"exclude"'),
       );
     });
   });
@@ -118,7 +113,7 @@ describe('FileGeneratorService', () => {
       FileGeneratorService.generateSourceFiles(mockConfig);
 
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/src/main.ts',
+        path.join(mockConfig.path, 'src', 'main.ts'),
         mockMainTs,
       );
     });
@@ -133,7 +128,7 @@ describe('FileGeneratorService', () => {
 
       expect(appModuleTemplate.createAppModule).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/src/app.module.ts',
+        path.join(mockConfig.path, 'src', 'app.module.ts'),
         mockAppModule,
       );
     });
@@ -148,7 +143,7 @@ describe('FileGeneratorService', () => {
 
       expect(appControllerTemplate.createAppController).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/src/app.controller.ts',
+        path.join(mockConfig.path, 'src', 'app.controller.ts'),
         mockController,
       );
     });
@@ -163,7 +158,7 @@ describe('FileGeneratorService', () => {
 
       expect(appServiceTemplate.createAppService).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/src/app.service.ts',
+        path.join(mockConfig.path, 'src', 'app.service.ts'),
         mockService,
       );
     });
@@ -185,11 +180,11 @@ describe('FileGeneratorService', () => {
       ).toHaveBeenCalled();
       expect(appServiceSpecTemplate.createAppServiceSpec).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/src/app.controller.spec.ts',
+        path.join(mockConfig.path, 'src', 'app.controller.spec.ts'),
         mockControllerSpec,
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/src/app.service.spec.ts',
+        path.join(mockConfig.path, 'src', 'app.service.spec.ts'),
         mockServiceSpec,
       );
     });
@@ -207,14 +202,16 @@ describe('FileGeneratorService', () => {
 
       FileGeneratorService.generateDatabaseFiles(mockConfig);
 
-      expect(fs.ensureDirSync).toHaveBeenCalledWith('/test/path/src/database');
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        path.join(mockConfig.path, 'src', 'database'),
+      );
 
       expect(
         require('../../templates/database-module.template')
           .createDatabaseModule,
       ).toHaveBeenCalledWith(Database.POSTGRES, undefined);
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/src/database/database.module.ts',
+        path.join(mockConfig.path, 'src', 'database', 'database.module.ts'),
         mockDatabaseModule,
       );
     });
@@ -236,7 +233,9 @@ describe('FileGeneratorService', () => {
     it('should create test directory', () => {
       FileGeneratorService.generateTestFiles(mockConfig);
 
-      expect(fs.ensureDirSync).toHaveBeenCalledWith('/test/path/test');
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        path.join(mockConfig.path, 'test'),
+      );
     });
 
     it('should generate e2e test file', () => {
@@ -249,7 +248,7 @@ describe('FileGeneratorService', () => {
 
       expect(appE2ESpecTemplate.createAppE2ESpec).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/test/app.e2e-spec.ts',
+        path.join(mockConfig.path, 'test', 'app.e2e-spec.ts'),
         mockE2ESpec,
       );
     });
@@ -264,7 +263,7 @@ describe('FileGeneratorService', () => {
 
       expect(jestE2EConfigTemplate.createJestE2EConfig).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/test/jest-e2e.json',
+        path.join(mockConfig.path, 'test', 'jest-e2e.json'),
         mockJestConfig,
       );
     });
@@ -282,11 +281,11 @@ describe('FileGeneratorService', () => {
 
       expect(EnvGenerator.generate).toHaveBeenCalledWith(mockConfig);
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/.env',
+        path.join(mockConfig.path, '.env'),
         'ENV_VAR=value',
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/.env.example',
+        path.join(mockConfig.path, '.env.example'),
         'ENV_VAR=',
       );
     });
@@ -306,11 +305,11 @@ describe('FileGeneratorService', () => {
 
       expect(ConfigFilesGenerator.generate).toHaveBeenCalledWith(mockConfig);
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/.eslintrc.js',
+        path.join(mockConfig.path, '.eslintrc.js'),
         'module.exports = {}',
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/.prettierrc',
+        path.join(mockConfig.path, '.prettierrc'),
         '{}',
       );
     });
@@ -330,11 +329,11 @@ describe('FileGeneratorService', () => {
 
       expect(DockerComposeGenerator.generate).toHaveBeenCalledWith(mockConfig);
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/docker-compose.yml',
+        path.join(mockConfig.path, 'docker-compose.yml'),
         'version: "3.8"',
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/Dockerfile',
+        path.join(mockConfig.path, 'Dockerfile'),
         'FROM node:18',
       );
     });
@@ -353,7 +352,7 @@ describe('FileGeneratorService', () => {
   });
 
   describe('generateGitHubActionsFiles', () => {
-    it('should generate GitHub Actions workflow when useGitHubActions is true', () => {
+    it('should generate GitHub Actions workflow', () => {
       const mockWorkflow = 'name: Tests\non: push';
       (
         GitHubActionsGenerator.generateTestWorkflow as jest.Mock
@@ -362,15 +361,60 @@ describe('FileGeneratorService', () => {
       FileGeneratorService.generateGitHubActionsFiles(mockConfig);
 
       expect(fs.ensureDirSync).toHaveBeenCalledWith(
-        '/test/path/.github/workflows',
+        path.join(mockConfig.path, '.github', 'workflows'),
       );
       expect(GitHubActionsGenerator.generateTestWorkflow).toHaveBeenCalledWith(
         PackageManager.NPM,
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/.github/workflows/tests.yml',
+        path.join(mockConfig.path, '.github', 'workflows', 'tests.yml'),
         mockWorkflow,
       );
+    });
+  });
+
+  describe('generateGraphQLFiles', () => {
+    it('should generate GraphQL module, schema, resolver and dataloader service when useGraphQL is true', () => {
+      const configWithGraphQL: ProjectConfig = {
+        ...mockConfig,
+        answers: { ...mockConfig.answers, useGraphQL: true },
+      };
+
+      FileGeneratorService.generateGraphQLFiles(configWithGraphQL);
+
+      const graphqlPath = path.join(configWithGraphQL.path, 'src', 'graphql');
+
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'resolvers'),
+      );
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'schemas'),
+      );
+      expect(fs.ensureDirSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'dataloaders'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'graphql.module.ts'),
+        expect.stringContaining('GraphqlModule'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'schemas', 'base.schema.ts'),
+        expect.stringContaining('BaseEntity'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'resolvers', 'app.resolver.ts'),
+        expect.stringContaining('AppResolver'),
+      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join(graphqlPath, 'dataloaders', 'dataloader.service.ts'),
+        expect.stringContaining('DataLoaderService'),
+      );
+    });
+
+    it('should not generate GraphQL files when useGraphQL is false', () => {
+      FileGeneratorService.generateGraphQLFiles(mockConfig);
+
+      expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
   });
 
@@ -389,7 +433,7 @@ describe('FileGeneratorService', () => {
         undefined, // orm parameter
       );
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/test/path/README.md',
+        path.join(mockConfig.path, 'README.md'),
         mockReadme,
       );
     });

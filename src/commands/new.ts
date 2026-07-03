@@ -98,6 +98,7 @@ export async function newCommand(
     FileGeneratorService.generateEnvironmentFiles(config);
     FileGeneratorService.generateConfigFiles(config);
     FileGeneratorService.generateDockerFiles(config);
+    FileGeneratorService.generateGraphQLFiles(config);
     FileGeneratorService.generateGitHubActionsFiles(config);
     FileGeneratorService.generateReadme(config);
 
@@ -109,6 +110,7 @@ export async function newCommand(
         answers.packageManager,
         answers.database,
         answers.orm,
+        answers.useGraphQL,
         answers.useAuth,
         answers.authStrategies,
       );
@@ -214,6 +216,12 @@ function showDryRunPreview(config: ProjectConfig, skipInstall: boolean): void {
       chalk.white(`  ORM:                ${chalk.green(config.answers.orm)}`),
     );
   }
+
+  console.log(
+    chalk.white(
+      `  GraphQL:            ${chalk.green(config.answers.useGraphQL ? 'Yes' : 'No')}`,
+    ),
+  );
 
   console.log(
     chalk.white(

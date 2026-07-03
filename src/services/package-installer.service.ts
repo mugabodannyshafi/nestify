@@ -11,6 +11,7 @@ export class PackageInstallerService {
   static getDependencies(
     database?: Database,
     orm?: ORM,
+    useGraphQL?: boolean,
     useAuth?: boolean,
     authStrategies?: string[],
   ): string[] {
@@ -25,6 +26,18 @@ export class PackageInstallerService {
       'class-validator',
       'class-transformer',
     ];
+
+    if (useGraphQL) {
+      dependencies.push(
+        '@nestjs/graphql',
+        '@nestjs/apollo',
+        '@apollo/server',
+        'graphql',
+        'graphql-ws',
+        'graphql-subscriptions',
+        'dataloader',
+      );
+    }
 
     // Add database-specific dependencies
     if (database === Database.MYSQL || database === Database.POSTGRES) {
@@ -131,6 +144,7 @@ export class PackageInstallerService {
     packageManager: PackageManager,
     database?: Database,
     orm?: ORM,
+    useGraphQL?: boolean,
     useAuth?: boolean,
     authStrategies?: string[],
   ): Promise<void> {
@@ -140,6 +154,7 @@ export class PackageInstallerService {
       const dependencies = this.getDependencies(
         database,
         orm,
+        useGraphQL,
         useAuth,
         authStrategies,
       );

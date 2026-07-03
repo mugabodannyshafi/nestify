@@ -9,6 +9,7 @@ export interface ProjectAnswers {
   orm?: ORM;
   useAuth?: boolean;
   authStrategies?: string[];
+  useGraphQL?: boolean;
 }
 
 export interface NewCommandOptions {
