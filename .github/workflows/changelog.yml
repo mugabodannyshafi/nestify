@@ -1,0 +1,53 @@
+name: Changelog Check
+
+on:
+  pull_request:
+    branches: [main, development]
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check CHANGELOG.md exists
+        run: |
+          if [ ! -f CHANGELOG.md ]; then
+            echo "❌ CHANGELOG.md is missing."
+            exit 1
+          fi
+          echo "✅ CHANGELOG.md found."
+
+      - name: Validate CHANGELOG.md format
+        run: |
+          grep -q '^# Changelog' CHANGELOG.md \
+            || { echo "❌ Missing '# Changelog' title."; exit 1; }
+          grep -q '^## \[Unreleased\]' CHANGELOG.md \
+            || { echo "❌ Missing '[Unreleased]' section."; exit 1; }
+          grep -qE '^## \[[0-9]+\.[0-9]+\.[0-9]+\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$' CHANGELOG.md \
+            || { echo "❌ No released version sections found."; exit 1; }
+          echo "✅ CHANGELOG.md format looks good."
+
+      - name: Check version compare links
+        run: |
+          grep -q '^\[Unreleased\]: ' CHANGELOG.md \
+            || { echo "❌ Missing [Unreleased] compare link."; exit 1; }
+          grep -qE '^\[[0-9]+\.[0-9]+\.[0-9]+\]: ' CHANGELOG.md \
+            || { echo "❌ Missing version compare links."; exit 1; }
+          echo "✅ Compare links found."
+
+      - name: Require CHANGELOG update for source changes
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          if git diff --name-only "${BASE_SHA}...${HEAD_SHA}" | grep -qE '^src/'; then
+            if ! git diff --name-only "${BASE_SHA}...${HEAD_SHA}" | grep -q '^CHANGELOG.md'; then
+              echo "❌ Source files were changed but CHANGELOG.md was not updated."
+              echo "   Please add an entry under [Unreleased]."
+              exit 1
+            fi
+          fi
+          echo "✅ CHANGELOG.md updated (or no source changes)."

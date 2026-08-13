@@ -10,6 +10,17 @@ We welcome contributions through Pull Requests. Here are the guidelines:
 
 All submissions require review. We use GitHub pull requests for this purpose.
 
+### Changelog Policy
+
+Every user-facing change must be reflected in [CHANGELOG.md](./CHANGELOG.md):
+
+1. Add an entry under `[Unreleased]` in the appropriate category (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`).
+2. Use the [Keep a Changelog](https://keepachangelog.com/) format and write entries from the user's perspective.
+3. Reference the related issue or pull request number when available.
+4. When cutting a release, move the `[Unreleased]` entries into a new dated section matching the released version and update the compare links at the bottom of the file.
+
+Pull requests that change user-facing behavior are expected to update `CHANGELOG.md`. A CI check (`Changelog Check`) validates the file's format on every pull request.
+
 ### Development Setup
 
 When working on nestify, you should:
